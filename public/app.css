@@ -1,0 +1,50 @@
+.header {
+    background: #0dcaf0;
+    height: 150px;
+    display: flex;
+    align-items: center;
+    padding: 0 400px;
+    font-family: "Lucida Console", "Courier New", monospace;
+    font-size: 1.7em;
+}
+
+.title {
+	background: #ffc107b0; /* Light green background with transparency */
+    text-align: center; /* Center-align the text */
+    font-family: "Lucida Console", "Courier New", monospace; /* Use specified fonts */
+    font-size: 2em; /* Font size for the title */
+    padding: 20px; /* Adds space inside the element */
+    color: black; /* Optional: Set text color */
+    /* Optional: Additional spacing techniques */
+    position: relative;
+    z-index: 1; /* Ensure it sits above other content if needed */
+}
+
+.nav-container {
+	background: #f1f1f1;
+    display: flex;
+    font-family: "Lucida Console", "Courier New", monospace; /* Use specified fonts */
+    font-size: 1.5em; /* Font size for the title */
+    justify-content: space-around;
+    padding: 80px;
+}
+
+.nav-column ul {
+    list-style: none; /* Remove bullets */
+    padding: 0; /* Remove padding */
+    margin: 0; /* Remove margin */
+}
+
+.nav-column li {
+    margin-bottom: 20px; /* Space out the links */
+}
+
+.nav-column a {
+    text-decoration: none; /* Remove link underline */
+    color: #007bff; /* Set link color */
+}
+
+.nav-column a:hover {
+    text-decoration: underline; /* Underline on hover */
+}
+
