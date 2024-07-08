@@ -1,11 +1,15 @@
 .header {
-    background: #0dcaf0;
-    height: 150px;
-    display: flex;
-    align-items: center;
-    padding: 0 400px;
-    font-family: "Lucida Console", "Courier New", monospace;
+    background: #0dcaf0; /* Blue background */
+    height: 150px; /* Fixed height */
+    display: flex; /* Flexbox for alignment */
+    align-items: center; /* Center items vertically */
+    justify-content: center; /* Center items horizontally */
+    font-family: "Lucida Console", "Courier New", monospace; /* Font family */
     font-size: 1.7em;
+}
+
+.header img {
+    margin-right: 20px; /* Space between the image and text */
 }
 
 .title {
@@ -27,7 +31,9 @@
     font-size: 1.5em; /* Font size for the title */
     justify-content: space-around;
     padding: 80px;
+    gap: 20px;
 }
+
 
 .nav-column ul {
     list-style: none; /* Remove bullets */
@@ -40,8 +46,11 @@
 }
 
 .nav-column a {
-    text-decoration: none; /* Remove link underline */
-    color: #007bff; /* Set link color */
+    text-decoration: none; /* Remove underline from links */
+    color: #007bff; /* Link color */
+    font-size: 1em; /* Font size for links */
+    display: block; /* Make links block-level for easier spacing */
+    padding: 5px 0; /* Padding for links */
 }
 
 .nav-column a:hover {
