@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\BankController;
 
 
 
@@ -28,3 +29,9 @@ Route::get('/check_balance', [AccountController::class, 'checkBalance'])->name('
 #Customer routes
 Route::get('/whoami', [CustomerController::class, 'forgotAccountNumber'])->name('whoami');
 Route::get('/findme', [CustomerController::class, 'forgotPassword'])->name('findme');
+
+
+
+#Bank routes
+Route::get('/aboutus', [BankController::class, 'aboutUs'])->name('aboutus');
+Route::get('/contactus', [BankController::class, 'contactUs'])->name('contactus');

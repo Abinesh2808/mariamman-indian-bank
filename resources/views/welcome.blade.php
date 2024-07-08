@@ -34,6 +34,12 @@
                 <li><a href="{{ url('close_account') }}">Account closure</a></li>
             </ul>
         </div>
+        <div class="nav-column">
+            <ul>
+                <li><a href="{{ url('aboutus') }}">About Us</a></li>
+                <li><a href="{{ url('contactus') }}">Contact Us</a></li>
+            </ul>
+        </div>
     </div>
 </body>
 </html>
