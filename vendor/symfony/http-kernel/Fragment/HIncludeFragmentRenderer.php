@@ -13,8 +13,8 @@ namespace Symfony\Component\HttpKernel\Fragment;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\UriSigner;
 use Symfony\Component\HttpKernel\Controller\ControllerReference;
+use Symfony\Component\HttpKernel\UriSigner;
 use Twig\Environment;
 
 /**
@@ -24,33 +24,42 @@ use Twig\Environment;
  */
 class HIncludeFragmentRenderer extends RoutableFragmentRenderer
 {
+    private $globalDefaultTemplate;
+    private $signer;
+    private $twig;
+    private $charset;
+
     /**
      * @param string|null $globalDefaultTemplate The global default content (it can be a template name or the content)
      */
-    public function __construct(
-        private ?Environment $twig = null,
-        private ?UriSigner $signer = null,
-        private ?string $globalDefaultTemplate = null,
-        private string $charset = 'utf-8',
-    ) {
+    public function __construct(?Environment $twig = null, ?UriSigner $signer = null, ?string $globalDefaultTemplate = null, string $charset = 'utf-8')
+    {
+        $this->twig = $twig;
+        $this->globalDefaultTemplate = $globalDefaultTemplate;
+        $this->signer = $signer;
+        $this->charset = $charset;
     }
 
     /**
      * Checks if a templating engine has been set.
+     *
+     * @return bool
      */
-    public function hasTemplating(): bool
+    public function hasTemplating()
     {
         return null !== $this->twig;
     }
 
     /**
+     * {@inheritdoc}
+     *
      * Additional available options:
      *
      *  * default:    The default content (it can be a template name or the content)
      *  * id:         An optional hx:include tag id attribute
      *  * attributes: An optional array of hx:include tag attributes
      */
-    public function render(string|ControllerReference $uri, Request $request, array $options = []): Response
+    public function render($uri, Request $request, array $options = [])
     {
         if ($uri instanceof ControllerReference) {
             $uri = (new FragmentUriGenerator($this->fragmentPath, $this->signer))->generate($uri, $request);
@@ -85,7 +94,10 @@ class HIncludeFragmentRenderer extends RoutableFragmentRenderer
         return new Response(sprintf('<hx:include src="%s"%s>%s</hx:include>', $uri, $renderedAttributes, $content));
     }
 
-    public function getName(): string
+    /**
+     * {@inheritdoc}
+     */
+    public function getName()
     {
         return 'hinclude';
     }

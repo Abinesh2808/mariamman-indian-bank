@@ -56,7 +56,7 @@ class RateLimited
             return $next($job);
         }
 
-        $limiterResponse = $limiter($job);
+        $limiterResponse = call_user_func($limiter, $job);
 
         if ($limiterResponse instanceof Unlimited) {
             return $next($job);
@@ -69,7 +69,7 @@ class RateLimited
                 return (object) [
                     'key' => md5($this->limiterName.$limit->key),
                     'maxAttempts' => $limit->maxAttempts,
-                    'decaySeconds' => $limit->decaySeconds,
+                    'decayMinutes' => $limit->decayMinutes,
                 ];
             })->all()
         );
@@ -92,7 +92,7 @@ class RateLimited
                         : false;
             }
 
-            $this->limiter->hit($limit->key, $limit->decaySeconds);
+            $this->limiter->hit($limit->key, $limit->decayMinutes * 60);
         }
 
         return $next($job);

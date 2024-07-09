@@ -14,8 +14,8 @@
     <div class="nav-container">
         <div class="nav-column">
             <ul>
-                <li><a href="{{ url('register') }}">Register</a></li>
-                <li><a href="{{ url('login') }}">Login</a></li>
+                <li><a href="{{ url('register') }}">Open savings account</a></li>
+                <li><a href="{{ url('login') }}">Netbanking login</a></li>
             </ul>
         </div>
         <div class="nav-column">

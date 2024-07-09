@@ -27,19 +27,25 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class Esi extends AbstractSurrogate
 {
-    public function getName(): string
+    public function getName()
     {
         return 'esi';
     }
 
-    public function addSurrogateControl(Response $response): void
+    /**
+     * {@inheritdoc}
+     */
+    public function addSurrogateControl(Response $response)
     {
         if (str_contains($response->getContent(), '<esi:include')) {
             $response->headers->set('Surrogate-Control', 'content="ESI/1.0"');
         }
     }
 
-    public function renderIncludeTag(string $uri, ?string $alt = null, bool $ignoreErrors = true, string $comment = ''): string
+    /**
+     * {@inheritdoc}
+     */
+    public function renderIncludeTag(string $uri, ?string $alt = null, bool $ignoreErrors = true, string $comment = '')
     {
         $html = sprintf('<esi:include src="%s"%s%s />',
             $uri,
@@ -47,22 +53,25 @@ class Esi extends AbstractSurrogate
             $alt ? sprintf(' alt="%s"', $alt) : ''
         );
 
-        if ($comment) {
+        if (!empty($comment)) {
             return sprintf("<esi:comment text=\"%s\" />\n%s", $comment, $html);
         }
 
         return $html;
     }
 
-    public function process(Request $request, Response $response): Response
+    /**
+     * {@inheritdoc}
+     */
+    public function process(Request $request, Response $response)
     {
         $type = $response->headers->get('Content-Type');
-        if (!$type) {
+        if (empty($type)) {
             $type = 'text/html';
         }
 
         $parts = explode(';', $type);
-        if (!\in_array($parts[0], $this->contentTypes, true)) {
+        if (!\in_array($parts[0], $this->contentTypes)) {
             return $response;
         }
 

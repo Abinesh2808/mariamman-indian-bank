@@ -6,10 +6,6 @@ use Closure;
 use Illuminate\Contracts\Auth\Factory as FactoryContract;
 use InvalidArgumentException;
 
-/**
- * @mixin \Illuminate\Contracts\Auth\Guard
- * @mixin \Illuminate\Contracts\Auth\StatefulGuard
- */
 class AuthManager implements FactoryContract
 {
     use CreatesUserProviders;
@@ -54,7 +50,9 @@ class AuthManager implements FactoryContract
     {
         $this->app = $app;
 
-        $this->userResolver = fn ($guard = null) => $this->guard($guard)->user();
+        $this->userResolver = function ($guard = null) {
+            return $this->guard($guard)->user();
+        };
     }
 
     /**
@@ -128,7 +126,6 @@ class AuthManager implements FactoryContract
             $name,
             $provider,
             $this->app['session.store'],
-            rehashOnLogin: $this->app['config']->get('hashing.rehash_on_login', true),
         );
 
         // When using the remember me functionality of the authentication services we
@@ -211,7 +208,9 @@ class AuthManager implements FactoryContract
 
         $this->setDefaultDriver($name);
 
-        $this->userResolver = fn ($name = null) => $this->guard($name)->user();
+        $this->userResolver = function ($name = null) {
+            return $this->guard($name)->user();
+        };
     }
 
     /**

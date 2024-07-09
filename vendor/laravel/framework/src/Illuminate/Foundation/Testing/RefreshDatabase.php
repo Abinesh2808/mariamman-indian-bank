@@ -16,13 +16,9 @@ trait RefreshDatabase
      */
     public function refreshDatabase()
     {
-        $this->beforeRefreshingDatabase();
-
-        if ($this->usingInMemoryDatabase()) {
-            $this->restoreInMemoryDatabase();
-        }
-
-        $this->refreshTestDatabase();
+        $this->usingInMemoryDatabase()
+                        ? $this->refreshInMemoryDatabase()
+                        : $this->refreshTestDatabase();
 
         $this->afterRefreshingDatabase();
     }
@@ -40,19 +36,28 @@ trait RefreshDatabase
     }
 
     /**
-     * Restore the in-memory database between tests.
+     * Refresh the in-memory database.
      *
      * @return void
      */
-    protected function restoreInMemoryDatabase()
+    protected function refreshInMemoryDatabase()
     {
-        $database = $this->app->make('db');
+        $this->artisan('migrate', $this->migrateUsing());
 
-        foreach ($this->connectionsToTransact() as $name) {
-            if (isset(RefreshDatabaseState::$inMemoryConnections[$name])) {
-                $database->connection($name)->setPdo(RefreshDatabaseState::$inMemoryConnections[$name]);
-            }
-        }
+        $this->app[Kernel::class]->setArtisan(null);
+    }
+
+    /**
+     * The parameters that should be used when running "migrate".
+     *
+     * @return array
+     */
+    protected function migrateUsing()
+    {
+        return [
+            '--seed' => $this->shouldSeed(),
+            '--seeder' => $this->seeder(),
+        ];
     }
 
     /**
@@ -82,17 +87,8 @@ trait RefreshDatabase
     {
         $database = $this->app->make('db');
 
-        $this->app->instance('db.transactions', $transactionsManager = new DatabaseTransactionsManager);
-
         foreach ($this->connectionsToTransact() as $name) {
             $connection = $database->connection($name);
-
-            $connection->setTransactionManager($transactionsManager);
-
-            if ($this->usingInMemoryDatabase()) {
-                RefreshDatabaseState::$inMemoryConnections[$name] ??= $connection->getPdo();
-            }
-
             $dispatcher = $connection->getEventDispatcher();
 
             $connection->unsetEventDispatcher();
@@ -122,16 +118,6 @@ trait RefreshDatabase
     {
         return property_exists($this, 'connectionsToTransact')
                             ? $this->connectionsToTransact : [null];
-    }
-
-    /**
-     * Perform any work that should take place before the database has started refreshing.
-     *
-     * @return void
-     */
-    protected function beforeRefreshingDatabase()
-    {
-        // ...
     }
 
     /**

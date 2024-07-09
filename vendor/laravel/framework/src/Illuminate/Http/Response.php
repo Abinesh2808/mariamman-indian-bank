@@ -45,8 +45,7 @@ class Response extends SymfonyResponse
      *
      * @throws \InvalidArgumentException
      */
-    #[\Override]
-    public function setContent(mixed $content): static
+    public function setContent($content)
     {
         $this->original = $content;
 
@@ -94,7 +93,7 @@ class Response extends SymfonyResponse
      * Morph the given content into JSON.
      *
      * @param  mixed  $content
-     * @return string|false
+     * @return string
      */
     protected function morphToJson($content)
     {

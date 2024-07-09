@@ -29,27 +29,27 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
  */
 class FragmentHandler
 {
-    /** @var array<string, FragmentRendererInterface> */
-    private array $renderers = [];
+    private $debug;
+    private $renderers = [];
+    private $requestStack;
 
     /**
      * @param FragmentRendererInterface[] $renderers An array of FragmentRendererInterface instances
      * @param bool                        $debug     Whether the debug mode is enabled or not
      */
-    public function __construct(
-        private RequestStack $requestStack,
-        array $renderers = [],
-        private bool $debug = false,
-    ) {
+    public function __construct(RequestStack $requestStack, array $renderers = [], bool $debug = false)
+    {
+        $this->requestStack = $requestStack;
         foreach ($renderers as $renderer) {
             $this->addRenderer($renderer);
         }
+        $this->debug = $debug;
     }
 
     /**
      * Adds a renderer.
      */
-    public function addRenderer(FragmentRendererInterface $renderer): void
+    public function addRenderer(FragmentRendererInterface $renderer)
     {
         $this->renderers[$renderer->getName()] = $renderer;
     }
@@ -61,10 +61,14 @@ class FragmentHandler
      *
      *  * ignore_errors: true to return an empty string in case of an error
      *
+     * @param string|ControllerReference $uri A URI as a string or a ControllerReference instance
+     *
+     * @return string|null
+     *
      * @throws \InvalidArgumentException when the renderer does not exist
      * @throws \LogicException           when no main request is being handled
      */
-    public function render(string|ControllerReference $uri, string $renderer = 'inline', array $options = []): ?string
+    public function render($uri, string $renderer = 'inline', array $options = [])
     {
         if (!isset($options['ignore_errors'])) {
             $options['ignore_errors'] = !$this->debug;
@@ -91,7 +95,7 @@ class FragmentHandler
      *
      * @throws \RuntimeException when the Response is not successful
      */
-    protected function deliver(Response $response): ?string
+    protected function deliver(Response $response)
     {
         if (!$response->isSuccessful()) {
             $responseStatusCode = $response->getStatusCode();

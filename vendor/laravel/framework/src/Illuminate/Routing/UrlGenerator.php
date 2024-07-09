@@ -2,7 +2,6 @@
 
 namespace Illuminate\Routing;
 
-use BackedEnum;
 use Closure;
 use Illuminate\Contracts\Routing\UrlGenerator as UrlGeneratorContract;
 use Illuminate\Contracts\Routing\UrlRoutable;
@@ -90,13 +89,6 @@ class UrlGenerator implements UrlGeneratorContract
     protected $keyResolver;
 
     /**
-     * The missing named route resolver callable.
-     *
-     * @var callable
-     */
-    protected $missingNamedRouteResolver;
-
-    /**
      * The callback to use to format hosts.
      *
      * @var \Closure
@@ -175,26 +167,15 @@ class UrlGenerator implements UrlGeneratorContract
     }
 
     /**
-     * Get the previous path info for the request.
-     *
-     * @param  mixed  $fallback
-     * @return string
-     */
-    public function previousPath($fallback = false)
-    {
-        $previousPath = str_replace($this->to('/'), '', rtrim(preg_replace('/\?.*/', '', $this->previous($fallback)), '/'));
-
-        return $previousPath === '' ? '/' : $previousPath;
-    }
-
-    /**
      * Get the previous URL from the session if possible.
      *
      * @return string|null
      */
     protected function getPreviousUrlFromSession()
     {
-        return $this->getSession()?->previousUrl();
+        $session = $this->getSession();
+
+        return $session ? $session->previousUrl() : null;
     }
 
     /**
@@ -231,26 +212,6 @@ class UrlGenerator implements UrlGeneratorContract
     }
 
     /**
-     * Generate an absolute URL with the given query parameters.
-     *
-     * @param  string  $path
-     * @param  array  $query
-     * @param  mixed  $extra
-     * @param  bool|null  $secure
-     * @return string
-     */
-    public function query($path, $query = [], $extra = [], $secure = null)
-    {
-        [$path, $existingQueryString] = $this->extractQueryString($path);
-
-        parse_str(Str::after($existingQueryString, '?'), $existingQueryArray);
-
-        return rtrim($this->to($path.'?'.Arr::query(
-            array_merge($existingQueryArray, $query)
-        ), $extra, $secure), '?');
-    }
-
-    /**
      * Generate a secure, absolute URL to the given path.
      *
      * @param  string  $path
@@ -280,7 +241,7 @@ class UrlGenerator implements UrlGeneratorContract
         // for asset paths, but only for routes to endpoints in the application.
         $root = $this->assetRoot ?: $this->formatRoot($this->formatScheme($secure));
 
-        return Str::finish($this->removeIndex($root), '/').trim($path, '/');
+        return $this->removeIndex($root).'/'.trim($path, '/');
     }
 
     /**
@@ -322,7 +283,7 @@ class UrlGenerator implements UrlGeneratorContract
     {
         $i = 'index.php';
 
-        return str_contains($root, $i) ? str_replace('/'.$i, '', $root) : $root;
+        return Str::contains($root, $i) ? str_replace('/'.$i, '', $root) : $root;
     }
 
     /**
@@ -370,11 +331,7 @@ class UrlGenerator implements UrlGeneratorContract
         $key = call_user_func($this->keyResolver);
 
         return $this->route($name, $parameters + [
-            'signature' => hash_hmac(
-                'sha256',
-                $this->route($name, $parameters, $absolute),
-                is_array($key) ? $key[0] : $key
-            ),
+            'signature' => hash_hmac('sha256', $this->route($name, $parameters, $absolute), $key),
         ], $absolute);
     }
 
@@ -418,12 +375,11 @@ class UrlGenerator implements UrlGeneratorContract
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  bool  $absolute
-     * @param  array  $ignoreQuery
      * @return bool
      */
-    public function hasValidSignature(Request $request, $absolute = true, array $ignoreQuery = [])
+    public function hasValidSignature(Request $request, $absolute = true)
     {
-        return $this->hasCorrectSignature($request, $absolute, $ignoreQuery)
+        return $this->hasCorrectSignature($request, $absolute)
             && $this->signatureHasNotExpired($request);
     }
 
@@ -431,12 +387,11 @@ class UrlGenerator implements UrlGeneratorContract
      * Determine if the given request has a valid signature for a relative URL.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  array  $ignoreQuery
      * @return bool
      */
-    public function hasValidRelativeSignature(Request $request, array $ignoreQuery = [])
+    public function hasValidRelativeSignature(Request $request)
     {
-        return $this->hasValidSignature($request, false, $ignoreQuery);
+        return $this->hasValidSignature($request, false);
     }
 
     /**
@@ -444,35 +399,17 @@ class UrlGenerator implements UrlGeneratorContract
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  bool  $absolute
-     * @param  array  $ignoreQuery
      * @return bool
      */
-    public function hasCorrectSignature(Request $request, $absolute = true, array $ignoreQuery = [])
+    public function hasCorrectSignature(Request $request, $absolute = true)
     {
-        $ignoreQuery[] = 'signature';
-
         $url = $absolute ? $request->url() : '/'.$request->path();
 
-        $queryString = collect(explode('&', (string) $request->server->get('QUERY_STRING')))
-            ->reject(fn ($parameter) => in_array(Str::before($parameter, '='), $ignoreQuery))
-            ->join('&');
+        $queryString = ltrim(preg_replace('/(^|&)signature=[^&]+/', '', $request->server->get('QUERY_STRING')), '&');
 
-        $original = rtrim($url.'?'.$queryString, '?');
+        $signature = hash_hmac('sha256', rtrim($url.'?'.$queryString, '?'), call_user_func($this->keyResolver));
 
-        $keys = call_user_func($this->keyResolver);
-
-        $keys = is_array($keys) ? $keys : [$keys];
-
-        foreach ($keys as $key) {
-            if (hash_equals(
-                hash_hmac('sha256', $original, $key),
-                (string) $request->query('signature', '')
-            )) {
-                return true;
-            }
-        }
-
-        return false;
+        return hash_equals($signature, (string) $request->query('signature', ''));
     }
 
     /**
@@ -504,11 +441,6 @@ class UrlGenerator implements UrlGeneratorContract
             return $this->toRoute($route, $parameters, $absolute);
         }
 
-        if (! is_null($this->missingNamedRouteResolver) &&
-            ! is_null($url = call_user_func($this->missingNamedRouteResolver, $name, $parameters, $absolute))) {
-            return $url;
-        }
-
         throw new RouteNotFoundException("Route [{$name}] not defined.");
     }
 
@@ -529,12 +461,6 @@ class UrlGenerator implements UrlGeneratorContract
                     ? $value->{$route->bindingFieldFor($key)}
                     : $value;
         })->all();
-
-        array_walk_recursive($parameters, function (&$item) {
-            if ($item instanceof BackedEnum) {
-                $item = $item->value;
-            }
-        });
 
         return $this->routeUrl()->to(
             $route, $this->formatParameters($parameters), $absolute
@@ -572,11 +498,11 @@ class UrlGenerator implements UrlGeneratorContract
             $action = '\\'.implode('@', $action);
         }
 
-        if ($this->rootNamespace && ! str_starts_with($action, '\\')) {
+        if ($this->rootNamespace && strpos($action, '\\') !== 0) {
             return $this->rootNamespace.'\\'.$action;
+        } else {
+            return trim($action, '\\');
         }
-
-        return trim($action, '\\');
     }
 
     /**
@@ -633,7 +559,7 @@ class UrlGenerator implements UrlGeneratorContract
             $root = $this->cachedRoot;
         }
 
-        $start = str_starts_with($root, 'http://') ? 'http://' : 'https://';
+        $start = Str::startsWith($root, 'http://') ? 'http://' : 'https://';
 
         return preg_replace('~'.$start.'~', $scheme, $root, 1);
     }
@@ -856,40 +782,6 @@ class UrlGenerator implements UrlGeneratorContract
         $this->keyResolver = $keyResolver;
 
         return $this;
-    }
-
-    /**
-     * Clone a new instance of the URL generator with a different encryption key resolver.
-     *
-     * @param  callable  $keyResolver
-     * @return \Illuminate\Routing\UrlGenerator
-     */
-    public function withKeyResolver(callable $keyResolver)
-    {
-        return (clone $this)->setKeyResolver($keyResolver);
-    }
-
-    /**
-     * Set the callback that should be used to attempt to resolve missing named routes.
-     *
-     * @param  callable  $missingNamedRouteResolver
-     * @return $this
-     */
-    public function resolveMissingNamedRoutesUsing(callable $missingNamedRouteResolver)
-    {
-        $this->missingNamedRouteResolver = $missingNamedRouteResolver;
-
-        return $this;
-    }
-
-    /**
-     * Get the root controller namespace.
-     *
-     * @return string
-     */
-    public function getRootControllerNamespace()
-    {
-        return $this->rootNamespace;
     }
 
     /**

@@ -4,27 +4,21 @@ namespace Illuminate\Testing;
 
 use ArrayAccess;
 use Closure;
-use Illuminate\Contracts\Support\MessageBag;
 use Illuminate\Contracts\View\View;
 use Illuminate\Cookie\CookieValuePrefix;
-use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
-use Illuminate\Support\Traits\Conditionable;
-use Illuminate\Support\Traits\Dumpable;
 use Illuminate\Support\Traits\Macroable;
 use Illuminate\Support\Traits\Tappable;
-use Illuminate\Support\ViewErrorBag;
+use Illuminate\Testing\Assert as PHPUnit;
 use Illuminate\Testing\Constraints\SeeInOrder;
 use Illuminate\Testing\Fluent\AssertableJson;
-use Illuminate\Testing\TestResponseAssert as PHPUnit;
 use LogicException;
-use Symfony\Component\HttpFoundation\Cookie;
-use Symfony\Component\HttpFoundation\StreamedJsonResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
@@ -32,16 +26,9 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  */
 class TestResponse implements ArrayAccess
 {
-    use Concerns\AssertsStatusCodes, Conditionable, Dumpable, Tappable, Macroable {
+    use Tappable, Macroable {
         __call as macroCall;
     }
-
-    /**
-     * The original request.
-     *
-     * @var \Illuminate\Http\Request|null
-     */
-    public $baseRequest;
 
     /**
      * The response to delegate to.
@@ -55,7 +42,7 @@ class TestResponse implements ArrayAccess
      *
      * @var \Illuminate\Support\Collection
      */
-    public $exceptions;
+    protected $exceptions;
 
     /**
      * The streamed content of the response.
@@ -68,13 +55,11 @@ class TestResponse implements ArrayAccess
      * Create a new test response instance.
      *
      * @param  \Illuminate\Http\Response  $response
-     * @param  \Illuminate\Http\Request|null  $request
      * @return void
      */
-    public function __construct($response, $request = null)
+    public function __construct($response)
     {
         $this->baseResponse = $response;
-        $this->baseRequest = $request;
         $this->exceptions = new Collection;
     }
 
@@ -82,12 +67,11 @@ class TestResponse implements ArrayAccess
      * Create a new TestResponse from another response.
      *
      * @param  \Illuminate\Http\Response  $response
-     * @param  \Illuminate\Http\Request|null  $request
      * @return static
      */
-    public static function fromBaseResponse($response, $request = null)
+    public static function fromBaseResponse($response)
     {
-        return new static($response, $request);
+        return new static($response);
     }
 
     /**
@@ -97,7 +81,7 @@ class TestResponse implements ArrayAccess
      */
     public function assertSuccessful()
     {
-        PHPUnit::withResponse($this)->assertTrue(
+        PHPUnit::assertTrue(
             $this->isSuccessful(),
             $this->statusMessageWithDetails('>=200, <300', $this->getStatusCode())
         );
@@ -106,41 +90,78 @@ class TestResponse implements ArrayAccess
     }
 
     /**
-     * Assert that the Precognition request was successful.
+     * Assert that the response has a 200 status code.
      *
      * @return $this
      */
-    public function assertSuccessfulPrecognition()
+    public function assertOk()
     {
-        $this->assertNoContent();
+        return $this->assertStatus(200);
+    }
 
-        PHPUnit::withResponse($this)->assertTrue(
-            $this->headers->has('Precognition-Success'),
-            'Header [Precognition-Success] not present on response.'
-        );
+    /**
+     * Assert that the response has a 201 status code.
+     *
+     * @return $this
+     */
+    public function assertCreated()
+    {
+        return $this->assertStatus(201);
+    }
 
-        PHPUnit::withResponse($this)->assertSame(
-            'true',
-            $this->headers->get('Precognition-Success'),
-            'The Precognition-Success header was found, but the value is not `true`.'
-        );
+    /**
+     * Assert that the response has the given status code and no content.
+     *
+     * @param  int  $status
+     * @return $this
+     */
+    public function assertNoContent($status = 204)
+    {
+        $this->assertStatus($status);
+
+        PHPUnit::assertEmpty($this->getContent(), 'Response content is not empty.');
 
         return $this;
     }
 
     /**
-     * Assert that the response is a server error.
+     * Assert that the response has a not found status code.
      *
      * @return $this
      */
-    public function assertServerError()
+    public function assertNotFound()
     {
-        PHPUnit::withResponse($this)->assertTrue(
-            $this->isServerError(),
-            $this->statusMessageWithDetails('>=500, < 600', $this->getStatusCode())
-        );
+        return $this->assertStatus(404);
+    }
 
-        return $this;
+    /**
+     * Assert that the response has a forbidden status code.
+     *
+     * @return $this
+     */
+    public function assertForbidden()
+    {
+        return $this->assertStatus(403);
+    }
+
+    /**
+     * Assert that the response has an unauthorized status code.
+     *
+     * @return $this
+     */
+    public function assertUnauthorized()
+    {
+        return $this->assertStatus(401);
+    }
+
+    /**
+     * Assert that the response has a 422 status code.
+     *
+     * @return $this
+     */
+    public function assertUnprocessable()
+    {
+        return $this->assertStatus(422);
     }
 
     /**
@@ -153,7 +174,7 @@ class TestResponse implements ArrayAccess
     {
         $message = $this->statusMessageWithDetails($status, $actual = $this->getStatusCode());
 
-        PHPUnit::withResponse($this)->assertSame($status, $actual, $message);
+        PHPUnit::assertSame($actual, $status, $message);
 
         return $this;
     }
@@ -167,7 +188,74 @@ class TestResponse implements ArrayAccess
      */
     protected function statusMessageWithDetails($expected, $actual)
     {
+        $lastException = $this->exceptions->last();
+
+        if ($lastException) {
+            return $this->statusMessageWithException($expected, $actual, $lastException);
+        }
+
+        if ($this->baseResponse instanceof RedirectResponse) {
+            $session = $this->baseResponse->getSession();
+
+            if (! is_null($session) && $session->has('errors')) {
+                return $this->statusMessageWithErrors($expected, $actual, $session->get('errors')->all());
+            }
+        }
+
+        if ($this->baseResponse->headers->get('Content-Type') === 'application/json') {
+            $testJson = new AssertableJsonString($this->getContent());
+
+            if (isset($testJson['errors'])) {
+                return $this->statusMessageWithErrors($expected, $actual, $testJson->json());
+            }
+        }
+
         return "Expected response status code [{$expected}] but received {$actual}.";
+    }
+
+    /**
+     * Get an assertion message for a status assertion that has an unexpected exception.
+     *
+     * @param  string|int  $expected
+     * @param  string|int  $actual
+     * @param  \Throwable  $exception
+     * @return string
+     */
+    protected function statusMessageWithException($expected, $actual, $exception)
+    {
+        $exception = (string) $exception;
+
+        return <<<EOF
+Expected response status code [$expected] but received $actual.
+
+The following exception occurred during the request:
+
+$exception
+EOF;
+    }
+
+    /**
+     * Get an assertion message for a status assertion that contained errors.
+     *
+     * @param  string|int  $expected
+     * @param  string|int  $actual
+     * @param  array  $errors
+     * @return string
+     */
+    protected function statusMessageWithErrors($expected, $actual, $errors)
+    {
+        $errors = $this->baseResponse->headers->get('Content-Type') === 'application/json'
+            ? json_encode($errors, JSON_PRETTY_PRINT)
+            : implode(PHP_EOL, Arr::flatten($errors));
+
+        return <<<EOF
+Expected response status code [$expected] but received $actual.
+
+The following errors occurred during the request:
+
+$errors
+
+EOF;
     }
 
     /**
@@ -178,7 +266,7 @@ class TestResponse implements ArrayAccess
      */
     public function assertRedirect($uri = null)
     {
-        PHPUnit::withResponse($this)->assertTrue(
+        PHPUnit::assertTrue(
             $this->isRedirect(),
             $this->statusMessageWithDetails('201, 301, 302, 303, 307, 308', $this->getStatusCode()),
         );
@@ -198,35 +286,14 @@ class TestResponse implements ArrayAccess
      */
     public function assertRedirectContains($uri)
     {
-        PHPUnit::withResponse($this)->assertTrue(
+        PHPUnit::assertTrue(
             $this->isRedirect(),
             $this->statusMessageWithDetails('201, 301, 302, 303, 307, 308', $this->getStatusCode()),
         );
 
-        PHPUnit::withResponse($this)->assertTrue(
+        PHPUnit::assertTrue(
             Str::contains($this->headers->get('Location'), $uri), 'Redirect location ['.$this->headers->get('Location').'] does not contain ['.$uri.'].'
         );
-
-        return $this;
-    }
-
-    /**
-     * Assert whether the response is redirecting to a given route.
-     *
-     * @param  string  $name
-     * @param  mixed  $parameters
-     * @return $this
-     */
-    public function assertRedirectToRoute($name, $parameters = [])
-    {
-        $uri = route($name, $parameters);
-
-        PHPUnit::withResponse($this)->assertTrue(
-            $this->isRedirect(),
-            $this->statusMessageWithDetails('201, 301, 302, 303, 307, 308', $this->getStatusCode()),
-        );
-
-        $this->assertLocation($uri);
 
         return $this;
     }
@@ -244,14 +311,14 @@ class TestResponse implements ArrayAccess
             $uri = route($name, $parameters);
         }
 
-        PHPUnit::withResponse($this)->assertTrue(
+        PHPUnit::assertTrue(
             $this->isRedirect(),
             $this->statusMessageWithDetails('201, 301, 302, 303, 307, 308', $this->getStatusCode()),
         );
 
         $request = Request::create($this->headers->get('Location'));
 
-        PHPUnit::withResponse($this)->assertTrue(
+        PHPUnit::assertTrue(
             $request->hasValidSignature(), 'The response is not a redirect to a signed route.'
         );
 
@@ -261,7 +328,7 @@ class TestResponse implements ArrayAccess
                 'expires' => null,
             ]), '?');
 
-            PHPUnit::withResponse($this)->assertEquals(
+            PHPUnit::assertEquals(
                 app('url')->to($uri), $expectedUri
             );
         }
@@ -278,14 +345,14 @@ class TestResponse implements ArrayAccess
      */
     public function assertHeader($headerName, $value = null)
     {
-        PHPUnit::withResponse($this)->assertTrue(
+        PHPUnit::assertTrue(
             $this->headers->has($headerName), "Header [{$headerName}] not present on response."
         );
 
         $actual = $this->headers->get($headerName);
 
         if (! is_null($value)) {
-            PHPUnit::withResponse($this)->assertEquals(
+            PHPUnit::assertEquals(
                 $value, $this->headers->get($headerName),
                 "Header [{$headerName}] was found, but value [{$actual}] does not match [{$value}]."
             );
@@ -302,7 +369,7 @@ class TestResponse implements ArrayAccess
      */
     public function assertHeaderMissing($headerName)
     {
-        PHPUnit::withResponse($this)->assertFalse(
+        PHPUnit::assertFalse(
             $this->headers->has($headerName), "Unexpected header [{$headerName}] is present on response."
         );
 
@@ -317,8 +384,8 @@ class TestResponse implements ArrayAccess
      */
     public function assertLocation($uri)
     {
-        PHPUnit::withResponse($this)->assertEquals(
-            app('url')->to($uri), app('url')->to($this->headers->get('Location', ''))
+        PHPUnit::assertEquals(
+            app('url')->to($uri), app('url')->to($this->headers->get('Location'))
         );
 
         return $this;
@@ -332,10 +399,10 @@ class TestResponse implements ArrayAccess
      */
     public function assertDownload($filename = null)
     {
-        $contentDisposition = explode(';', $this->headers->get('content-disposition', ''));
+        $contentDisposition = explode(';', $this->headers->get('content-disposition'));
 
         if (trim($contentDisposition[0]) !== 'attachment') {
-            PHPUnit::withResponse($this)->fail(
+            PHPUnit::fail(
                 'Response does not offer a file download.'.PHP_EOL.
                 'Disposition ['.trim($contentDisposition[0]).'] found in header, [attachment] expected.'
             );
@@ -344,7 +411,7 @@ class TestResponse implements ArrayAccess
         if (! is_null($filename)) {
             if (isset($contentDisposition[1]) &&
                 trim(explode('=', $contentDisposition[1])[0]) !== 'filename') {
-                PHPUnit::withResponse($this)->fail(
+                PHPUnit::fail(
                     'Unsupported Content-Disposition header provided.'.PHP_EOL.
                     'Disposition ['.trim(explode('=', $contentDisposition[1])[0]).'] found in header, [filename] expected.'
                 );
@@ -353,9 +420,9 @@ class TestResponse implements ArrayAccess
             $message = "Expected file [{$filename}] is not present in Content-Disposition header.";
 
             if (! isset($contentDisposition[1])) {
-                PHPUnit::withResponse($this)->fail($message);
+                PHPUnit::fail($message);
             } else {
-                PHPUnit::withResponse($this)->assertSame(
+                PHPUnit::assertSame(
                     $filename,
                     isset(explode('=', $contentDisposition[1])[1])
                         ? trim(explode('=', $contentDisposition[1])[1], " \"'")
@@ -366,7 +433,7 @@ class TestResponse implements ArrayAccess
                 return $this;
             }
         } else {
-            PHPUnit::withResponse($this)->assertTrue(true);
+            PHPUnit::assertTrue(true);
 
             return $this;
         }
@@ -397,8 +464,8 @@ class TestResponse implements ArrayAccess
      */
     public function assertCookie($cookieName, $value = null, $encrypted = true, $unserialize = false)
     {
-        PHPUnit::withResponse($this)->assertNotNull(
-            $cookie = $this->getCookie($cookieName, $encrypted && ! is_null($value), $unserialize),
+        PHPUnit::assertNotNull(
+            $cookie = $this->getCookie($cookieName),
             "Cookie [{$cookieName}] not present on response."
         );
 
@@ -408,9 +475,13 @@ class TestResponse implements ArrayAccess
 
         $cookieValue = $cookie->getValue();
 
-        PHPUnit::withResponse($this)->assertEquals(
-            $value, $cookieValue,
-            "Cookie [{$cookieName}] was found, but value [{$cookieValue}] does not match [{$value}]."
+        $actual = $encrypted
+            ? CookieValuePrefix::remove(app('encrypter')->decrypt($cookieValue, $unserialize))
+            : $cookieValue;
+
+        PHPUnit::assertEquals(
+            $value, $actual,
+            "Cookie [{$cookieName}] was found, but value [{$actual}] does not match [{$value}]."
         );
 
         return $this;
@@ -424,15 +495,15 @@ class TestResponse implements ArrayAccess
      */
     public function assertCookieExpired($cookieName)
     {
-        PHPUnit::withResponse($this)->assertNotNull(
-            $cookie = $this->getCookie($cookieName, false),
+        PHPUnit::assertNotNull(
+            $cookie = $this->getCookie($cookieName),
             "Cookie [{$cookieName}] not present on response."
         );
 
-        $expiresAt = Carbon::createFromTimestamp($cookie->getExpiresTime(), date_default_timezone_get());
+        $expiresAt = Carbon::createFromTimestamp($cookie->getExpiresTime());
 
-        PHPUnit::withResponse($this)->assertTrue(
-            $cookie->getExpiresTime() !== 0 && $expiresAt->lessThan(Carbon::now()),
+        PHPUnit::assertTrue(
+            0 !== $cookie->getExpiresTime() && $expiresAt->lessThan(Carbon::now()),
             "Cookie [{$cookieName}] is not expired, it expires at [{$expiresAt}]."
         );
 
@@ -447,15 +518,15 @@ class TestResponse implements ArrayAccess
      */
     public function assertCookieNotExpired($cookieName)
     {
-        PHPUnit::withResponse($this)->assertNotNull(
-            $cookie = $this->getCookie($cookieName, false),
+        PHPUnit::assertNotNull(
+            $cookie = $this->getCookie($cookieName),
             "Cookie [{$cookieName}] not present on response."
         );
 
-        $expiresAt = Carbon::createFromTimestamp($cookie->getExpiresTime(), date_default_timezone_get());
+        $expiresAt = Carbon::createFromTimestamp($cookie->getExpiresTime());
 
-        PHPUnit::withResponse($this)->assertTrue(
-            $cookie->getExpiresTime() === 0 || $expiresAt->greaterThan(Carbon::now()),
+        PHPUnit::assertTrue(
+            0 === $cookie->getExpiresTime() || $expiresAt->greaterThan(Carbon::now()),
             "Cookie [{$cookieName}] is expired, it expired at [{$expiresAt}]."
         );
 
@@ -470,8 +541,8 @@ class TestResponse implements ArrayAccess
      */
     public function assertCookieMissing($cookieName)
     {
-        PHPUnit::withResponse($this)->assertNull(
-            $this->getCookie($cookieName, false),
+        PHPUnit::assertNull(
+            $this->getCookie($cookieName),
             "Cookie [{$cookieName}] is present on response."
         );
 
@@ -482,73 +553,15 @@ class TestResponse implements ArrayAccess
      * Get the given cookie from the response.
      *
      * @param  string  $cookieName
-     * @param  bool  $decrypt
-     * @param  bool  $unserialize
      * @return \Symfony\Component\HttpFoundation\Cookie|null
      */
-    public function getCookie($cookieName, $decrypt = true, $unserialize = false)
+    public function getCookie($cookieName)
     {
         foreach ($this->headers->getCookies() as $cookie) {
             if ($cookie->getName() === $cookieName) {
-                if (! $decrypt) {
-                    return $cookie;
-                }
-
-                $decryptedValue = CookieValuePrefix::remove(
-                    app('encrypter')->decrypt($cookie->getValue(), $unserialize)
-                );
-
-                return new Cookie(
-                    $cookie->getName(),
-                    $decryptedValue,
-                    $cookie->getExpiresTime(),
-                    $cookie->getPath(),
-                    $cookie->getDomain(),
-                    $cookie->isSecure(),
-                    $cookie->isHttpOnly(),
-                    $cookie->isRaw(),
-                    $cookie->getSameSite(),
-                    $cookie->isPartitioned()
-                );
+                return $cookie;
             }
         }
-    }
-
-    /**
-     * Assert that the given string matches the response content.
-     *
-     * @param  string  $value
-     * @return $this
-     */
-    public function assertContent($value)
-    {
-        PHPUnit::withResponse($this)->assertSame($value, $this->content());
-
-        return $this;
-    }
-
-    /**
-     * Assert that the given string matches the streamed response content.
-     *
-     * @param  string  $value
-     * @return $this
-     */
-    public function assertStreamedContent($value)
-    {
-        PHPUnit::withResponse($this)->assertSame($value, $this->streamedContent());
-
-        return $this;
-    }
-
-    /**
-     * Assert that the given array matches the streamed JSON response content.
-     *
-     * @param  array  $value
-     * @return $this
-     */
-    public function assertStreamedJsonContent($value)
-    {
-        return $this->assertStreamedContent(json_encode($value, JSON_THROW_ON_ERROR));
     }
 
     /**
@@ -562,10 +575,10 @@ class TestResponse implements ArrayAccess
     {
         $value = Arr::wrap($value);
 
-        $values = $escape ? array_map('e', $value) : $value;
+        $values = $escape ? array_map('e', ($value)) : $value;
 
         foreach ($values as $value) {
-            PHPUnit::withResponse($this)->assertStringContainsString((string) $value, $this->getContent());
+            PHPUnit::assertStringContainsString((string) $value, $this->getContent());
         }
 
         return $this;
@@ -580,9 +593,9 @@ class TestResponse implements ArrayAccess
      */
     public function assertSeeInOrder(array $values, $escape = true)
     {
-        $values = $escape ? array_map('e', $values) : $values;
+        $values = $escape ? array_map('e', ($values)) : $values;
 
-        PHPUnit::withResponse($this)->assertThat($values, new SeeInOrder($this->getContent()));
+        PHPUnit::assertThat($values, new SeeInOrder($this->getContent()));
 
         return $this;
     }
@@ -598,13 +611,13 @@ class TestResponse implements ArrayAccess
     {
         $value = Arr::wrap($value);
 
-        $values = $escape ? array_map('e', $value) : $value;
+        $values = $escape ? array_map('e', ($value)) : $value;
 
-        $content = strip_tags($this->getContent());
-
-        foreach ($values as $value) {
-            PHPUnit::withResponse($this)->assertStringContainsString((string) $value, $content);
-        }
+        tap(strip_tags($this->getContent()), function ($content) use ($values) {
+            foreach ($values as $value) {
+                PHPUnit::assertStringContainsString((string) $value, $content);
+            }
+        });
 
         return $this;
     }
@@ -618,9 +631,9 @@ class TestResponse implements ArrayAccess
      */
     public function assertSeeTextInOrder(array $values, $escape = true)
     {
-        $values = $escape ? array_map('e', $values) : $values;
+        $values = $escape ? array_map('e', ($values)) : $values;
 
-        PHPUnit::withResponse($this)->assertThat($values, new SeeInOrder(strip_tags($this->getContent())));
+        PHPUnit::assertThat($values, new SeeInOrder(strip_tags($this->getContent())));
 
         return $this;
     }
@@ -636,10 +649,10 @@ class TestResponse implements ArrayAccess
     {
         $value = Arr::wrap($value);
 
-        $values = $escape ? array_map('e', $value) : $value;
+        $values = $escape ? array_map('e', ($value)) : $value;
 
         foreach ($values as $value) {
-            PHPUnit::withResponse($this)->assertStringNotContainsString((string) $value, $this->getContent());
+            PHPUnit::assertStringNotContainsString((string) $value, $this->getContent());
         }
 
         return $this;
@@ -656,13 +669,13 @@ class TestResponse implements ArrayAccess
     {
         $value = Arr::wrap($value);
 
-        $values = $escape ? array_map('e', $value) : $value;
+        $values = $escape ? array_map('e', ($value)) : $value;
 
-        $content = strip_tags($this->getContent());
-
-        foreach ($values as $value) {
-            PHPUnit::withResponse($this)->assertStringNotContainsString((string) $value, $content);
-        }
+        tap(strip_tags($this->getContent()), function ($content) use ($values) {
+            foreach ($values as $value) {
+                PHPUnit::assertStringNotContainsString((string) $value, $content);
+            }
+        });
 
         return $this;
     }
@@ -703,20 +716,6 @@ class TestResponse implements ArrayAccess
     public function assertJsonPath($path, $expect)
     {
         $this->decodeResponseJson()->assertPath($path, $expect);
-
-        return $this;
-    }
-
-    /**
-     * Assert that the given path in the response contains all of the expected values without looking at the order.
-     *
-     * @param  string  $path
-     * @param  array  $expect
-     * @return $this
-     */
-    public function assertJsonPathCanonicalizing($path, array $expect)
-    {
-        $this->decodeResponseJson()->assertPathCanonicalizing($path, $expect);
 
         return $this;
     }
@@ -788,26 +787,13 @@ class TestResponse implements ArrayAccess
     }
 
     /**
-     * Assert that the response does not contain the given path.
-     *
-     * @param  string  $path
-     * @return $this
-     */
-    public function assertJsonMissingPath(string $path)
-    {
-        $this->decodeResponseJson()->assertMissingPath($path);
-
-        return $this;
-    }
-
-    /**
      * Assert that the response has a given JSON structure.
      *
      * @param  array|null  $structure
      * @param  array|null  $responseData
      * @return $this
      */
-    public function assertJsonStructure(?array $structure = null, $responseData = null)
+    public function assertJsonStructure(array $structure = null, $responseData = null)
     {
         $this->decodeResponseJson()->assertStructure($structure, $responseData);
 
@@ -839,7 +825,7 @@ class TestResponse implements ArrayAccess
     {
         $errors = Arr::wrap($errors);
 
-        PHPUnit::withResponse($this)->assertNotEmpty($errors, 'No validation errors were provided.');
+        PHPUnit::assertNotEmpty($errors, 'No validation errors were provided.');
 
         $jsonErrors = Arr::get($this->json(), $responseKey) ?? [];
 
@@ -870,7 +856,7 @@ class TestResponse implements ArrayAccess
             }
 
             if ($errorMissing) {
-                PHPUnit::withResponse($this)->fail(
+                PHPUnit::fail(
                     "Failed to find a validation error in the response for key and message: '$key' => '$expectedMessage'".PHP_EOL.PHP_EOL.$errorMessage
                 );
             }
@@ -895,7 +881,7 @@ class TestResponse implements ArrayAccess
             PHP_EOL.PHP_EOL.json_encode($jsonErrors, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE).PHP_EOL
             : 'Response does not have JSON validation errors.';
 
-        PHPUnit::withResponse($this)->assertArrayHasKey(
+        PHPUnit::assertArrayHasKey(
             $key,
             $jsonErrors,
             "Failed to find a validation error in the response for key: '{$key}'".PHP_EOL.PHP_EOL.$errorMessage
@@ -914,7 +900,7 @@ class TestResponse implements ArrayAccess
     public function assertJsonMissingValidationErrors($keys = null, $responseKey = 'errors')
     {
         if ($this->getContent() === '') {
-            PHPUnit::withResponse($this)->assertTrue(true);
+            PHPUnit::assertTrue(true);
 
             return $this;
         }
@@ -922,7 +908,7 @@ class TestResponse implements ArrayAccess
         $json = $this->json();
 
         if (! Arr::has($json, $responseKey)) {
-            PHPUnit::withResponse($this)->assertTrue(true);
+            PHPUnit::assertTrue(true);
 
             return $this;
         }
@@ -930,60 +916,18 @@ class TestResponse implements ArrayAccess
         $errors = Arr::get($json, $responseKey, []);
 
         if (is_null($keys) && count($errors) > 0) {
-            PHPUnit::withResponse($this)->fail(
+            PHPUnit::fail(
                 'Response has unexpected validation errors: '.PHP_EOL.PHP_EOL.
                 json_encode($errors, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
             );
         }
 
         foreach (Arr::wrap($keys) as $key) {
-            PHPUnit::withResponse($this)->assertFalse(
+            PHPUnit::assertFalse(
                 isset($errors[$key]),
                 "Found unexpected validation error for key: '{$key}'"
             );
         }
-
-        return $this;
-    }
-
-    /**
-     * Assert that the given key is a JSON array.
-     *
-     * @param  string|null  $key
-     * @return $this
-     */
-    public function assertJsonIsArray($key = null)
-    {
-        $data = $this->json($key);
-
-        $encodedData = json_encode($data);
-
-        PHPUnit::withResponse($this)->assertTrue(
-            is_array($data)
-            && str_starts_with($encodedData, '[')
-            && str_ends_with($encodedData, ']')
-        );
-
-        return $this;
-    }
-
-    /**
-     * Assert that the given key is a JSON object.
-     *
-     * @param  string|null  $key
-     * @return $this
-     */
-    public function assertJsonIsObject($key = null)
-    {
-        $data = $this->json($key);
-
-        $encodedData = json_encode($data);
-
-        PHPUnit::withResponse($this)->assertTrue(
-            is_array($data)
-            && str_starts_with($encodedData, '{')
-            && str_ends_with($encodedData, '}')
-        );
 
         return $this;
     }
@@ -1005,7 +949,7 @@ class TestResponse implements ArrayAccess
             if ($this->exception) {
                 throw $this->exception;
             } else {
-                PHPUnit::withResponse($this)->fail('Invalid JSON was returned from the route.');
+                PHPUnit::fail('Invalid JSON was returned from the route.');
             }
         }
 
@@ -1024,17 +968,6 @@ class TestResponse implements ArrayAccess
     }
 
     /**
-     * Get the JSON decoded body of the response as a collection.
-     *
-     * @param  string|null  $key
-     * @return \Illuminate\Support\Collection
-     */
-    public function collect($key = null)
-    {
-        return Collection::make($this->json($key));
-    }
-
-    /**
      * Assert that the response view equals the given value.
      *
      * @param  string  $value
@@ -1044,7 +977,7 @@ class TestResponse implements ArrayAccess
     {
         $this->ensureResponseHasView();
 
-        PHPUnit::withResponse($this)->assertEquals($value, $this->original->name());
+        PHPUnit::assertEquals($value, $this->original->name());
 
         return $this;
     }
@@ -1065,20 +998,13 @@ class TestResponse implements ArrayAccess
         $this->ensureResponseHasView();
 
         if (is_null($value)) {
-            PHPUnit::withResponse($this)->assertTrue(Arr::has($this->original->gatherData(), $key));
+            PHPUnit::assertTrue(Arr::has($this->original->gatherData(), $key));
         } elseif ($value instanceof Closure) {
-            PHPUnit::withResponse($this)->assertTrue($value(Arr::get($this->original->gatherData(), $key)));
+            PHPUnit::assertTrue($value(Arr::get($this->original->gatherData(), $key)));
         } elseif ($value instanceof Model) {
-            PHPUnit::withResponse($this)->assertTrue($value->is(Arr::get($this->original->gatherData(), $key)));
-        } elseif ($value instanceof EloquentCollection) {
-            $actual = Arr::get($this->original->gatherData(), $key);
-
-            PHPUnit::withResponse($this)->assertInstanceOf(EloquentCollection::class, $actual);
-            PHPUnit::withResponse($this)->assertSameSize($value, $actual);
-
-            $value->each(fn ($item, $index) => PHPUnit::withResponse($this)->assertTrue($actual->get($index)->is($item)));
+            PHPUnit::assertTrue($value->is(Arr::get($this->original->gatherData(), $key)));
         } else {
-            PHPUnit::withResponse($this)->assertEquals($value, Arr::get($this->original->gatherData(), $key));
+            PHPUnit::assertEquals($value, Arr::get($this->original->gatherData(), $key));
         }
 
         return $this;
@@ -1126,7 +1052,7 @@ class TestResponse implements ArrayAccess
     {
         $this->ensureResponseHasView();
 
-        PHPUnit::withResponse($this)->assertFalse(Arr::has($this->original->gatherData(), $key));
+        PHPUnit::assertFalse(Arr::has($this->original->gatherData(), $key));
 
         return $this;
     }
@@ -1139,7 +1065,7 @@ class TestResponse implements ArrayAccess
     protected function ensureResponseHasView()
     {
         if (! $this->responseHasView()) {
-            return PHPUnit::withResponse($this)->fail('The response is not a view.');
+            return PHPUnit::fail('The response is not a view.');
         }
 
         return $this;
@@ -1176,20 +1102,20 @@ class TestResponse implements ArrayAccess
         }
 
         if (empty($errors)) {
-            PHPUnit::withResponse($this)->assertTrue(true);
+            PHPUnit::assertTrue(true);
 
             return $this;
         }
 
         if (is_null($keys) && count($errors) > 0) {
-            PHPUnit::withResponse($this)->fail(
+            PHPUnit::fail(
                 'Response has unexpected validation errors: '.PHP_EOL.PHP_EOL.
                 json_encode($errors, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
             );
         }
 
         foreach (Arr::wrap($keys) as $key) {
-            PHPUnit::withResponse($this)->assertFalse(
+            PHPUnit::assertFalse(
                 isset($errors[$key]),
                 "Found unexpected validation error for key: '{$key}'"
             );
@@ -1216,6 +1142,8 @@ class TestResponse implements ArrayAccess
 
         $this->assertSessionHas('errors');
 
+        $keys = (array) $errors;
+
         $sessionErrors = $this->session()->get('errors')->getBag($errorBag)->getMessages();
 
         $errorMessage = $sessionErrors
@@ -1224,29 +1152,27 @@ class TestResponse implements ArrayAccess
                 : 'Response does not have validation errors in the session.';
 
         foreach (Arr::wrap($errors) as $key => $value) {
-            PHPUnit::withResponse($this)->assertArrayHasKey(
-                $resolvedKey = (is_int($key)) ? $value : $key,
+            PHPUnit::assertArrayHasKey(
+                (is_int($key)) ? $value : $key,
                 $sessionErrors,
-                "Failed to find a validation error in session for key: '{$resolvedKey}'".PHP_EOL.PHP_EOL.$errorMessage
+                "Failed to find a validation error in session for key: '{$value}'".PHP_EOL.PHP_EOL.$errorMessage
             );
 
-            foreach (Arr::wrap($value) as $message) {
-                if (! is_int($key)) {
-                    $hasError = false;
+            if (! is_int($key)) {
+                $hasError = false;
 
-                    foreach (Arr::wrap($sessionErrors[$key]) as $sessionErrorMessage) {
-                        if (Str::contains($sessionErrorMessage, $message)) {
-                            $hasError = true;
+                foreach (Arr::wrap($sessionErrors[$key]) as $sessionErrorMessage) {
+                    if (Str::contains($sessionErrorMessage, $value)) {
+                        $hasError = true;
 
-                            break;
-                        }
+                        break;
                     }
+                }
 
-                    if (! $hasError) {
-                        PHPUnit::withResponse($this)->fail(
-                            "Failed to find a validation error for key and message: '$key' => '$message'".PHP_EOL.PHP_EOL.$errorMessage
-                        );
-                    }
+                if (! $hasError) {
+                    PHPUnit::fail(
+                        "Failed to find a validation error for key and message: '$key' => '$value'".PHP_EOL.PHP_EOL.$errorMessage
+                    );
                 }
             }
         }
@@ -1268,14 +1194,14 @@ class TestResponse implements ArrayAccess
         }
 
         if (is_null($value)) {
-            PHPUnit::withResponse($this)->assertTrue(
+            PHPUnit::assertTrue(
                 $this->session()->has($key),
                 "Session is missing expected key [{$key}]."
             );
         } elseif ($value instanceof Closure) {
-            PHPUnit::withResponse($this)->assertTrue($value($this->session()->get($key)));
+            PHPUnit::assertTrue($value($this->session()->get($key)));
         } else {
-            PHPUnit::withResponse($this)->assertEquals($value, $this->session()->get($key));
+            PHPUnit::assertEquals($value, $this->session()->get($key));
         }
 
         return $this;
@@ -1322,14 +1248,14 @@ class TestResponse implements ArrayAccess
         }
 
         if (is_null($value)) {
-            PHPUnit::withResponse($this)->assertTrue(
+            PHPUnit::assertTrue(
                 $this->session()->hasOldInput($key),
                 "Session is missing expected key [{$key}]."
             );
         } elseif ($value instanceof Closure) {
-            PHPUnit::withResponse($this)->assertTrue($value($this->session()->getOldInput($key)));
+            PHPUnit::assertTrue($value($this->session()->getOldInput($key)));
         } else {
-            PHPUnit::withResponse($this)->assertEquals($value, $this->session()->getOldInput($key));
+            PHPUnit::assertEquals($value, $this->session()->getOldInput($key));
         }
 
         return $this;
@@ -1353,9 +1279,9 @@ class TestResponse implements ArrayAccess
 
         foreach ($keys as $key => $value) {
             if (is_int($key)) {
-                PHPUnit::withResponse($this)->assertTrue($errors->has($value), "Session missing error: $value");
+                PHPUnit::assertTrue($errors->has($value), "Session missing error: $value");
             } else {
-                PHPUnit::withResponse($this)->assertContains(is_bool($value) ? (string) $value : $value, $errors->get($key, $format));
+                PHPUnit::assertContains(is_bool($value) ? (string) $value : $value, $errors->get($key, $format));
             }
         }
 
@@ -1379,7 +1305,7 @@ class TestResponse implements ArrayAccess
         }
 
         if (is_null($this->session()->get('errors'))) {
-            PHPUnit::withResponse($this)->assertTrue(true);
+            PHPUnit::assertTrue(true);
 
             return $this;
         }
@@ -1388,9 +1314,9 @@ class TestResponse implements ArrayAccess
 
         foreach ($keys as $key => $value) {
             if (is_int($key)) {
-                PHPUnit::withResponse($this)->assertFalse($errors->has($value), "Session has unexpected error: $value");
+                PHPUnit::assertFalse($errors->has($value), "Session has unexpected error: $value");
             } else {
-                PHPUnit::withResponse($this)->assertNotContains($value, $errors->get($key, $format));
+                PHPUnit::assertNotContains($value, $errors->get($key, $format));
             }
         }
 
@@ -1406,24 +1332,12 @@ class TestResponse implements ArrayAccess
     {
         $hasErrors = $this->session()->has('errors');
 
-        PHPUnit::withResponse($this)->assertFalse(
+        $errors = $hasErrors ? $this->session()->get('errors')->all() : [];
+
+        PHPUnit::assertFalse(
             $hasErrors,
             'Session has unexpected errors: '.PHP_EOL.PHP_EOL.
-            json_encode((function () use ($hasErrors) {
-                $errors = [];
-
-                $sessionErrors = $this->session()->get('errors');
-
-                if ($hasErrors && is_a($sessionErrors, ViewErrorBag::class)) {
-                    foreach ($sessionErrors->getBags() as $bag => $messages) {
-                        if (is_a($messages, MessageBag::class)) {
-                            $errors[$bag] = $messages->all();
-                        }
-                    }
-                }
-
-                return $errors;
-            })(), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
+            json_encode($errors, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
         );
 
         return $this;
@@ -1455,7 +1369,7 @@ class TestResponse implements ArrayAccess
                 $this->assertSessionMissing($value);
             }
         } else {
-            PHPUnit::withResponse($this)->assertFalse(
+            PHPUnit::assertFalse(
                 $this->session()->has($key),
                 "Session has unexpected key [{$key}]."
             );
@@ -1471,13 +1385,19 @@ class TestResponse implements ArrayAccess
      */
     protected function session()
     {
-        $session = app('session.store');
+        return app('session.store');
+    }
 
-        if (! $session->isStarted()) {
-            $session->start();
-        }
+    /**
+     * Dump the content from the response and end the script.
+     *
+     * @return never
+     */
+    public function dd()
+    {
+        $this->dump();
 
-        return $session;
+        exit(1);
     }
 
     /**
@@ -1508,10 +1428,9 @@ class TestResponse implements ArrayAccess
     /**
      * Dump the content from the response.
      *
-     * @param  string|null  $key
      * @return $this
      */
-    public function dump($key = null)
+    public function dump()
     {
         $content = $this->getContent();
 
@@ -1521,11 +1440,7 @@ class TestResponse implements ArrayAccess
             $content = $json;
         }
 
-        if (! is_null($key)) {
-            dump(data_get($content, $key));
-        } else {
-            dump($content);
-        }
+        dump($content);
 
         return $this;
     }
@@ -1572,9 +1487,8 @@ class TestResponse implements ArrayAccess
             return $this->streamedContent;
         }
 
-        if (! $this->baseResponse instanceof StreamedResponse
-            && ! $this->baseResponse instanceof StreamedJsonResponse) {
-            PHPUnit::withResponse($this)->fail('The response is not a streamed response.');
+        if (! $this->baseResponse instanceof StreamedResponse) {
+            PHPUnit::fail('The response is not a streamed response.');
         }
 
         ob_start(function (string $buffer): string {
@@ -1618,7 +1532,7 @@ class TestResponse implements ArrayAccess
      * Proxy isset() checks to the underlying base response.
      *
      * @param  string  $key
-     * @return bool
+     * @return mixed
      */
     public function __isset($key)
     {
@@ -1631,7 +1545,8 @@ class TestResponse implements ArrayAccess
      * @param  string  $offset
      * @return bool
      */
-    public function offsetExists($offset): bool
+    #[\ReturnTypeWillChange]
+    public function offsetExists($offset)
     {
         return $this->responseHasView()
                     ? isset($this->original->gatherData()[$offset])
@@ -1644,7 +1559,8 @@ class TestResponse implements ArrayAccess
      * @param  string  $offset
      * @return mixed
      */
-    public function offsetGet($offset): mixed
+    #[\ReturnTypeWillChange]
+    public function offsetGet($offset)
     {
         return $this->responseHasView()
                     ? $this->viewData($offset)
@@ -1660,7 +1576,8 @@ class TestResponse implements ArrayAccess
      *
      * @throws \LogicException
      */
-    public function offsetSet($offset, $value): void
+    #[\ReturnTypeWillChange]
+    public function offsetSet($offset, $value)
     {
         throw new LogicException('Response data may not be mutated using array access.');
     }
@@ -1673,7 +1590,8 @@ class TestResponse implements ArrayAccess
      *
      * @throws \LogicException
      */
-    public function offsetUnset($offset): void
+    #[\ReturnTypeWillChange]
+    public function offsetUnset($offset)
     {
         throw new LogicException('Response data may not be mutated using array access.');
     }

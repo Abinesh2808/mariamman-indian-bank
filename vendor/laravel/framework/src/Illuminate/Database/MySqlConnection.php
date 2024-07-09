@@ -2,42 +2,19 @@
 
 namespace Illuminate\Database;
 
-use Exception;
+use Doctrine\DBAL\Driver\PDOMySql\Driver as DoctrineDriver;
+use Doctrine\DBAL\Version;
+use Illuminate\Database\PDO\MySqlDriver;
 use Illuminate\Database\Query\Grammars\MySqlGrammar as QueryGrammar;
 use Illuminate\Database\Query\Processors\MySqlProcessor;
 use Illuminate\Database\Schema\Grammars\MySqlGrammar as SchemaGrammar;
 use Illuminate\Database\Schema\MySqlBuilder;
 use Illuminate\Database\Schema\MySqlSchemaState;
 use Illuminate\Filesystem\Filesystem;
-use Illuminate\Support\Str;
 use PDO;
 
 class MySqlConnection extends Connection
 {
-    /**
-     * Escape a binary value for safe SQL embedding.
-     *
-     * @param  string  $value
-     * @return string
-     */
-    protected function escapeBinary($value)
-    {
-        $hex = bin2hex($value);
-
-        return "x'{$hex}'";
-    }
-
-    /**
-     * Determine if the given database exception was caused by a unique constraint violation.
-     *
-     * @param  \Exception  $exception
-     * @return bool
-     */
-    protected function isUniqueConstraintError(Exception $exception)
-    {
-        return boolval(preg_match('#Integrity constraint violation: 1062#i', $exception->getMessage()));
-    }
-
     /**
      * Determine if the connected database is a MariaDB database.
      *
@@ -45,19 +22,7 @@ class MySqlConnection extends Connection
      */
     public function isMaria()
     {
-        return str_contains($this->getPdo()->getAttribute(PDO::ATTR_SERVER_VERSION), 'MariaDB');
-    }
-
-    /**
-     * Get the server version for the connection.
-     *
-     * @return string
-     */
-    public function getServerVersion(): string
-    {
-        return str_contains($version = parent::getServerVersion(), 'MariaDB')
-            ? Str::between($version, '5.5.5-', '-MariaDB')
-            : $version;
+        return strpos($this->getPdo()->getAttribute(PDO::ATTR_SERVER_VERSION), 'MariaDB') !== false;
     }
 
     /**
@@ -67,9 +32,7 @@ class MySqlConnection extends Connection
      */
     protected function getDefaultQueryGrammar()
     {
-        ($grammar = new QueryGrammar)->setConnection($this);
-
-        return $this->withTablePrefix($grammar);
+        return $this->withTablePrefix(new QueryGrammar);
     }
 
     /**
@@ -93,9 +56,7 @@ class MySqlConnection extends Connection
      */
     protected function getDefaultSchemaGrammar()
     {
-        ($grammar = new SchemaGrammar)->setConnection($this);
-
-        return $this->withTablePrefix($grammar);
+        return $this->withTablePrefix(new SchemaGrammar);
     }
 
     /**
@@ -105,7 +66,7 @@ class MySqlConnection extends Connection
      * @param  callable|null  $processFactory
      * @return \Illuminate\Database\Schema\MySqlSchemaState
      */
-    public function getSchemaState(?Filesystem $files = null, ?callable $processFactory = null)
+    public function getSchemaState(Filesystem $files = null, callable $processFactory = null)
     {
         return new MySqlSchemaState($this, $files, $processFactory);
     }
@@ -118,5 +79,15 @@ class MySqlConnection extends Connection
     protected function getDefaultPostProcessor()
     {
         return new MySqlProcessor;
+    }
+
+    /**
+     * Get the Doctrine DBAL driver.
+     *
+     * @return \Doctrine\DBAL\Driver\PDOMySql\Driver|\Illuminate\Database\PDO\MySqlDriver
+     */
+    protected function getDoctrineDriver()
+    {
+        return class_exists(Version::class) ? new DoctrineDriver : new MySqlDriver;
     }
 }

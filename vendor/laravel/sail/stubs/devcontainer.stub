@@ -6,6 +6,7 @@
 	],
 	"service": "laravel.test",
 	"workspaceFolder": "/var/www/html",
+	"settings": {},
 	"customizations": {
 		"vscode": {
 			"extensions": [
@@ -14,12 +15,11 @@
 				// "ryannaddy.laravel-artisan",
 				// "onecentlin.laravel5-snippets",
 				// "onecentlin.laravel-blade"
-			],
-			"settings": {}
+			]
 		}
 	},
 	"remoteUser": "sail",
-	"postCreateCommand": "chown -R 1000:1000 /var/www/html 2>/dev/null || true"
+	"postCreateCommand": "chown -R 1000:1000 /var/www/html"
 	// "forwardPorts": [],
 	// "runServices": [],
 	// "shutdownAction": "none",
