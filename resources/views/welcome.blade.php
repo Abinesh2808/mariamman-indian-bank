@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mariyamman Indian Bank</title>
+    <title>Mariamman Indian Bank</title>
     <link rel="stylesheet" href="{{ asset('bootstrap/css/bootstrap.min.css') }}">
     <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
     <style>
@@ -39,7 +39,7 @@
     <header class="row py-1">
         <div class="col-12 col-md-6 d-flex align-items-center logo-container">
             <img src="{{ asset('no-background-logo.png') }}" alt="Bank Logo">
-            <span>Mariyamman Indian Bank</span>
+            <span>Mariamman Indian Bank</span>
         </div>
         <div class="col-12 col-md-6 d-flex justify-content-center justify-content-md-flex-end align-items-center">
             <ul class="list-inline mb-0">
