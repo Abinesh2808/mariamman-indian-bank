@@ -35,7 +35,7 @@
         }
     </style>
 </head>
-<body>
+<body class="position-sticky">
     <header class="row py-1">
         <a class="col-12 col-md-6 d-flex align-items-center logo-container text-decoration-none text-dark" href="/">
             <img src="{{ asset('no-background-logo.png') }}" alt="Bank Logo">
@@ -54,7 +54,7 @@
     <div class="container-fluid mt-1">
         @yield('content')
     </div>
-    <footer class="p-4 p-md-5 mt-5 d-flex justify-content-center text-muted">
+    <footer class="p-4 p-md-5 mt-3 d-flex justify-content-center text-muted">
         <div>
             <span> © 2024 All rights reserved only to <b>Abinesh S.</b></span>
         </div>
