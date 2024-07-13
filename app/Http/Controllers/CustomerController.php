@@ -8,11 +8,11 @@ class CustomerController extends Controller
 {
     public function forgotAccountNumber()
     {
-        return "account number recovery page";
+        return view('pages.whoami');
     }
 
     public function forgotPassword()
     {
-        return "password recovery page";
+        return view('pages.findme');
     }
 }

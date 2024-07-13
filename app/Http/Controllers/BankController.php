@@ -8,11 +8,13 @@ class BankController extends Controller
 {
     public function aboutUs()
     {
-        return "about us page";
+        // Return the view for the "About Us" page
+        return view('pages.aboutus');
     }
 
     public function contactUs()
     {
-        return "contact us page";
+        // Return the view for the "Contact Us" page
+        return view('pages.contactus');
     }
 }

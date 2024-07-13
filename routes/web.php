@@ -18,7 +18,7 @@ use App\Http\Controllers\BankController;
 */
 
 #Welcome page
-Route::view('/', 'welcome');
+Route::view('/', 'layouts.welcome');
 
 
 #Login routes
@@ -44,3 +44,6 @@ Route::get('/findme', [CustomerController::class, 'forgotPassword'])->name('find
 #Bank routes
 Route::get('/aboutus', [BankController::class, 'aboutUs'])->name('aboutus');
 Route::get('/contactus', [BankController::class, 'contactUs'])->name('contactus');
+
+
+Route::get('/dashboard', [AccountController::class, 'dashboard'])->name('dashboard');

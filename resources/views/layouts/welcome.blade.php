@@ -37,19 +37,19 @@
 </head>
 <body class="position-sticky">
     <header class="row py-1">
-        <div class="col-12 col-md-6 d-flex align-items-center logo-container">
+        <a class="col-12 col-md-6 d-flex align-items-center logo-container text-decoration-none text-dark" href="/">
             <img src="{{ asset('no-background-logo.png') }}" alt="Bank Logo">
             <span>Mariamman Indian Bank</span>
-        </div>
+        </a>
         <div class="col-12 col-md-6 d-flex justify-content-center justify-content-md-flex-end align-items-center">
             <ul class="list-inline mb-0">
-                <li class="list-inline-item"><a class="text-decoration-none text-dark h6" href="#">Netbanking</a></li>
-                <li class="list-inline-item"><a class="text-decoration-none text-dark h6" href="#">Contact Us</a></li>
+                <li class="list-inline-item"><a class="text-decoration-none text-muted h6" href="{{ url('login') }}">Netbanking</a></li>
+                <li class="list-inline-item"><a class="text-decoration-none text-muted h6" href="{{ url('contactus') }}">Contact Us</a></li>
             </ul>
         </div>
     </header>
     <nav class="bg-dark text-white">
-        <marquee behavior="scroll" direction="left" scrollamount="8" class="mt-3"><strong>QUICK LINKS</strong></marquee>
+        <marquee behavior="scroll" direction="left" scrollamount="8" class="mt-3"><strong>BANKING AT YOUR FINGERTIPS</strong></marquee>
     </nav>
     <script src="{{ asset('bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <div class="container-fluid mt-1">
@@ -100,7 +100,7 @@
             </div>
         </div>
     </div>
-    <footer class="p-5 d-flex justify-content-center">
+    <footer class="p-4 p-md-5 mt-5 d-flex justify-content-center text-muted">
         <div>
             <span> © 2024 All rights reserved only to <b>Abinesh S.</b></span>
         </div>

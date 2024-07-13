@@ -8,21 +8,21 @@ class LoginController extends Controller
 {
     public function register()
     {
-        return "register Page";
+        return view('pages.register');
     }
 
     public function login()
     {
-        return "login page";
+        return view('pages.login');
     }
 
-    public function verifyRegistration()
+    public function verifyRegistration(Request $request)
     {
         return "Verifying registration";
     }
 
-    public function validateLogin()
+    public function validateLogin(Request $request)
     {
-        return "validating registration";
+        return "Validating login";
     }
 }

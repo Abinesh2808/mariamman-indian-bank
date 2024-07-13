@@ -8,33 +8,36 @@ class AccountController extends Controller
 {
     public function getStatement($fromDate, $toDate)
     {
-        return "statement from ".$fromDate." to ".$toDate;
+        return view('pages.statement', compact('fromDate', 'toDate'));
+    }
+
+    public function dashboard()
+    {
+        return view('pages.dashboard');
     }
 
     public function depositAmount()
     {
-        return "deposit page";
+        return view('pages.deposit');
     }
 
     public function withdrawAmount()
     {
-        return "withdraw page";
+        return view('pages.withdraw');
     }
 
     public function updateAccount()
     {
-        return "account update page";
+        return view('pages.update_account');
     }
 
     public function closeAccount()
     {
-        return "account closure page";
+        return view('pages.close_account');
     }
 
     public function checkBalance()
     {
-        return "balance check";
+        return view('pages.check_balance');
     }
-
-
 }
