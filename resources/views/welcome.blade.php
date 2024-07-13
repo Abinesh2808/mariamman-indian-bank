@@ -78,11 +78,11 @@
                 <div class="card p-3">
                     <div class="card-body">
                         <ul class="list-inline">
-                            <li><a class="text-decoration-none m-3" href="{{ url('statement') }}">Statement</a></li>
-                            <li><a class="text-decoration-none m-3" href="{{ url('deposit') }}">Deposit</a></li>
-                            <li><a class="text-decoration-none m-3" href="{{ url('withdraw') }}">Withdraw</a></li>
+                            <li><a class="text-decoration-none m-3" href="{{ url('statement') }}">Account Statement</a></li>
+                            <li><a class="text-decoration-none m-3" href="{{ url('deposit') }}">Deposit amount</a></li>
+                            <li><a class="text-decoration-none m-3" href="{{ url('withdraw') }}">Withdraw amount</a></li>
                             <li><a class="text-decoration-none m-3" href="{{ url('check_balance') }}">Check balance</a></li>
-                            <li><a class="text-decoration-none m-3" href="{{ url('update_account') }}">Update details</a></li>
+                            <li><a class="text-decoration-none m-3" href="{{ url('update_account') }}">Update profile</a></li>
                             <li><a class="text-decoration-none m-3" href="{{ url('close_account') }}">Account closure</a></li>
                         </ul>
                     </div>
