@@ -57,7 +57,7 @@
                 <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;At Mariamman Indian Bank, we are dedicated to delivering the highest quality banking experience to our valued customers. Whether you're opening a new account, managing your savings, or exploring investment opportunities, we have a wide range of services designed to meet your needs.</p>
             </div>
         </div>
-        <div class="row">
+        <div class="row px-4 m-2 mx-md-4">
             <div class="col-12 col-md-6 p-3">
                 <div class="card p-3">
                     <div class="card-body">

@@ -18,7 +18,8 @@ use App\Http\Controllers\BankController;
 */
 
 #Welcome page
-Route::view('/', 'layouts.welcome');
+Route::view('/', 'pages.login');
+Route::view('/welcome', 'layouts.welcome');
 
 
 #Login routes

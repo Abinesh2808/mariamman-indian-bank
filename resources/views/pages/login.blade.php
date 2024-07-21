@@ -10,8 +10,8 @@
                 <form action="{{ route('login') }}" method="POST">
                     @csrf
                     <div class="mb-3">
-                        <label for="email" class="form-label">User ID / Phone number</label>
-                        <input type="email" id="email" name="email" class="form-control" placeholder="Enter user id / phone number" required>
+                        <label for="email" class="form-label">User ID / Phone number / Account number</label>
+                        <input type="email" id="email" name="email" class="form-control" placeholder="Enter user id / Phone number / Account number" required>
                     </div>
                     <div class="mb-3">
                         <label for="password" class="form-label">Password</label>
@@ -21,7 +21,13 @@
                     <span class="ms-4 text-muted">(If you want to login to existing account, use username:abinesh, password:admin)</span>
                 </form>
                 <div class="mt-2 text-center">
-                    <span>Don't have an savings account? <br><a href="{{ route('register') }}">Open a Savings A/C here</a></span>
+                    <div class="d-flex justify-content-center">
+                        <a href="{{ route('whoami') }}" class="btn btn-link">Forgot Password?</a>
+                        <a href="{{ route('findme') }}" class="btn btn-link">Forgot Account Number?</a>
+                    </div>
+                    <div class="mt-3">
+                        <span>Don't have a savings account? <br><a href="{{ route('register') }}">Open a Savings A/C here</a></span>
+                    </div>
                 </div>
             </div>
         </div>
