@@ -6,9 +6,9 @@ use Illuminate\Http\Request;
 
 class AccountController extends Controller
 {
-    public function getStatement($fromDate, $toDate)
+    public function getStatement()
     {
-        return view('pages.statement', compact('fromDate', 'toDate'));
+        return view('pages.statement');
     }
 
     public function dashboard()

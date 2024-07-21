@@ -27,7 +27,7 @@ Route::get('/login', [LoginController::class, 'login'])->name('login');
 
 
 #Account routes
-Route::get('/statement/{fromDate}/to/{toDate}', [AccountController::class, 'getStatement'])->name('statement');
+Route::get('/statement', [AccountController::class, 'getStatement'])->name('statement');
 Route::get('/deposit', [AccountController::class, 'depositAmount'])->name('deposit');
 Route::get('/withdraw', [AccountController::class, 'withdrawAmount'])->name('withdraw');
 Route::get('/update_account', [AccountController::class, 'updateAccount'])->name('update_account');
