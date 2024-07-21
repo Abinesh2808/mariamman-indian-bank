@@ -34,21 +34,8 @@
     </style>
 </head>
 <body class="position-sticky">
-    <header class="row py-1">
-        <a class="col-12 col-md-6 d-flex align-items-center logo-container text-decoration-none text-dark" href="/">
-            <img src="{{ asset('no-background-logo.png') }}" alt="Bank Logo">
-            <span>MARIAMMAN INDIAN BANK</span>
-        </a>
-        <div class="col-12 col-md-6 d-flex justify-content-center justify-content-md-flex-end align-items-center">
-            <ul class="list-inline mb-0">
-                <li class="list-inline-item"><a class="text-decoration-none text-muted h6" href="{{ url('login') }}">Netbanking</a></li>
-                <li class="list-inline-item"><a class="text-decoration-none text-muted h6" href="{{ url('contactus') }}">Contact Us</a></li>
-            </ul>
-        </div>
-    </header>
-    <nav class="navbar-text bg-secondary text-white">
-        <marquee behavior="scroll" direction="left" scrollamount="8" class="mt-3"><strong>BANKING AT YOUR FINGERTIPS</strong></marquee>
-    </nav>
+    <x-header/>
+    <x-navbar2/>
     <script src="{{ asset('bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <div class="container-fluid mt-3">
         <div class="row">
@@ -102,10 +89,6 @@
             </div>
         </div>
     </div>
-    <footer class="p-4 p-md-5 mt-3 d-flex justify-content-center text-muted">
-        <div>
-            <span> © 2024 All rights reserved only to <b>Abinesh S.</b></span>
-        </div>
-    </footer>
+    <x-footer/>
 </body>
 </html>
