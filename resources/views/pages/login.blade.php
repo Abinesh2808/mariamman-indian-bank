@@ -22,8 +22,8 @@
                 </form>
                 <div class="mt-2 text-center">
                     <div class="d-flex justify-content-center">
-                        <a href="{{ route('whoami') }}" class="btn btn-link">Forgot Password?</a>
-                        <a href="{{ route('findme') }}" class="btn btn-link">Forgot Account Number?</a>
+                        <a href="{{ route('whoami') }}" class="btn btn-link">Forgot Account Number?</a>
+                        <a href="{{ route('findme') }}" class="btn btn-link">Forgot Password?</a>
                     </div>
                     <div class="mt-3">
                         <span>Don't have a savings account? <br><a href="{{ route('register') }}">Open a Savings A/C here</a></span>

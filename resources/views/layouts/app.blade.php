@@ -28,10 +28,8 @@
         .card {
             height: 200px;
             background-color: #f2f2f2;
-        }
-        div.card {
-          box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-          text-align: left;
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+            text-align: left;
         }
     </style>
 </head>
@@ -49,7 +47,7 @@
         </div>
     </header>
     <nav class="navbar-text bg-secondary text-white">
-        <marquee behavior="scroll" direction="left" scrollamount="8" class="mt-3"><strong>BANKING AT YOUR FINGERTIPS</strong></marquee>
+        <marquee behavior="scroll" direction="left" scrollamount="8" class="mt-3"><strong>MARIAMMAN INDIAN BANK - Your Banking Partner !</strong></marquee>
     </nav>
     <div class="container-fluid mt-1">
         @yield('content')
