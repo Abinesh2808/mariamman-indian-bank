@@ -53,7 +53,7 @@
     <div class="container-fluid mt-3">
         <div class="row">
             <div class="col-12 col-md-11 p-md-2 ms-md-4">
-                <h5 class="h4">Welcome to Mariamman Indian Bank,</h5>
+                <h5 class="h4 mt-5">Welcome to Mariamman Indian Bank</h5>
                 <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;At Mariamman Indian Bank, we are dedicated to delivering the highest quality banking experience to our valued customers. Whether you're opening a new account, managing your savings, or exploring investment opportunities, we have a wide range of services designed to meet your needs.</p>
             </div>
         </div>
