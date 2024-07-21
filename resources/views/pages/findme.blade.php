@@ -12,16 +12,19 @@
             <div class="col-12 col-md-8">
                 <div class="mb-3">
                     <label for="account_number" class="form-label">Account number</label>
-                    <input type="email" id="account_number" name="mobile" class="form-control" placeholder="Enter your mobile number" required>
+                    <input type="email" id="account_number" name="mobile" class="form-control" placeholder="Enter your account number" required>
                 </div>
                 <div class="mb-3">
                     <label for="mobile" class="form-label">Mobile number</label>
                     <input type="mobile" id="mobile" name="mobile" class="form-control" placeholder="Enter your mobile number" required>
+                    <div class="d-flex justify-content-end">
+                        <a id="get-otp-link" class="btn btn-link" href="javascript:void(0);">Get OTP</a>
+                    </div>
                 </div>      
-                <div class="mb-3">
+                <!-- <div class="mb-3">
                     <label for="password" class="form-label">Password</label>
                     <input type="password" id="password" name="password" class="form-control" placeholder="Enter your netbanking password" required>
-                </div>
+                </div> -->
                 <div class="mb-3">
                     OTP:<input type="text" id="otp" name="password" class="form-control" disabled>
                 </div>

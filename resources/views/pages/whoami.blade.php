@@ -12,15 +12,19 @@
                     <p>Why did you forgot your account number ? </p>
                     <textarea class="form-control" rows="3" required></textarea><br>
                     <input type="checkbox" name="NRI">
-                        Is it a NRI account ? <br>
+                        Is it a NRI Account ? <br>
                 </div>      
                 <div class="mb-3">
                     <label for="mobile" class="form-label">Mobile number</label>
                     <input type="text" id="mobile" name="mobile" class="form-control" placeholder="Enter your mobile number" required>
+                </div>
+                <div class="mb-3">
+                    <label for="dob" class="form-label">Date of Birth</label>
+                    <input type="date" id="dob" name="dob" class="form-control" required>
                 </div>      
                 <div class="mb-3">
                     <label for="password" class="form-label">Password</label>
-                    <input type="password" id="password" name="password" class="form-control" placeholder="Enter your netbanking password" required>
+                    <input type="password" id="password" name="password" class="form-control" placeholder="Enter your netbanking password">
                 </div>
                 <button type="submit" class="btn btn-primary">Show Account Number</button>
                 <a href="/" class="btn btn-secondary">Cancel</a>
