@@ -26,8 +26,12 @@
                         <input type="text" id="lname" name="mother-name" class="form-control" placeholder="Enter your mother name">
                     </div>
                     <div class="mb-3">
+                        <label for="mobile" class="form-label">Mobile number</label>
+                        <input type="text" id="mobile" name="mobile" class="form-control" placeholder="Enter your mobile number" required>
+                    </div>
+                    <div class="mb-3">
                         <label for="email" class="form-label">Email address</label>
-                        <input type="email" id="email" name="email" class="form-control" placeholder="Enter your email" required>
+                        <input type="text" id="email" name="email" class="form-control" placeholder="Enter your email" required>
                     </div>
                     <div class="mb-3">
                         <label for="address" class="form-label">Address</label>
@@ -35,7 +39,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="email" class="form-label">Family income</label>
-                        <input type="email" id="email" name="email" class="form-control" placeholder="Enter your family income" required>
+                        <input type="text" id="email" name="email" class="form-control" placeholder="Enter your family income" required>
                     </div>
                     <div class="mb-3">
                         <label for="password" class="form-label">Netbanking password</label>

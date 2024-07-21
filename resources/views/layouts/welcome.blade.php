@@ -48,12 +48,12 @@
             </ul>
         </div>
     </header>
-    <nav class="bg-secondary text-white">
+    <nav class="navbar-text bg-secondary text-white">
         <marquee behavior="scroll" direction="left" scrollamount="8" class="mt-3"><strong>BANKING AT YOUR FINGERTIPS</strong></marquee>
     </nav>
     <script src="{{ asset('bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <div class="container-fluid mt-1">
-        <div class="row">
+        <div class="row px-4 m-2 mx-md-4">
             <div class="col-12 col-md-6 p-3">
                 <div class="card p-3">
                     <div class="card-body">

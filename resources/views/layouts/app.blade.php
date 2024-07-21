@@ -48,7 +48,7 @@
             </ul>
         </div>
     </header>
-    <nav class="bg-secondary text-white">
+    <nav class="navbar-text bg-secondary text-white">
         <marquee behavior="scroll" direction="left" scrollamount="8" class="mt-3"><strong>BANKING AT YOUR FINGERTIPS</strong></marquee>
     </nav>
     <div class="container-fluid mt-1">
