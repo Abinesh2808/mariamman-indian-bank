@@ -32,4 +32,17 @@ class BankController extends Controller
             return (int)$newAccountnumber;
         }
     }
+
+    public static function generate_customer_id()
+    {
+        $ifscPrefix = env("IFSC_PREFIX", "");
+
+        do {
+            $customerNumber = rand(100102, 990945);
+            $customerID = $ifscPrefix.(String)$customerNumber;
+
+        } while(Customer::checkCustomerIDPresence($customerID));
+        
+        return $customerID;
+    }
 }

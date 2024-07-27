@@ -16,9 +16,8 @@ class LoginController extends Controller
     }
 
     public function registerCustomer(Request $request)
-    {
-        try {
-            Customer::create([
+    {   
+        $customerData = [
                 'name' => $request->input('fname') . ' ' . $request->input('lname'),
                 'father_name' => $request->input('father_name'),
                 'mother_name' => $request->input('mother_name'),
@@ -30,13 +29,19 @@ class LoginController extends Controller
                 'id_card_number' => $request->input('id_no'),
                 'family_income' => $request->input('family_income'),
                 'password' => Hash::make($request->input('password')),
-                'account_number' => BankController::generate_account_number() 
-            ]);
-            return response()->json(['message' => 'Customer registered successfully']);
-        } catch(Exception $e){
+                'account_number' => BankController::generate_account_number(), 
+                'customer_id' => BankController::generate_customer_id() 
+            ];
+            
+        try {
+            Customer::create($customerData);
+            return response()->json(['message' => 'Customer registered successfully',
+                                    'data' => $customerData]);
+        } catch(\Exception $e){
             return response()->json([
                 'error' => 'Failed to register customer',
-                'message' => $e->getMessage()], 500);
+                'message' => $e->getMessage(),
+                'data' => $customerData]);
         }
         
     }
