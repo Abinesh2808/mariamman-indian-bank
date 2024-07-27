@@ -37,8 +37,8 @@
                         <input type="text" id="payer" name="payer" class="form-control" placeholder="Enter your name" required>
                     </div>
                     <div class="mb-3">
-                        <button type="submit" class="btn btn-primary">Deposit</button>
-                        <a href="{{route('check_balance')}}" class="btn btn-warning">Check Balance</a>
+                        <button type="submit" class="btn btn-success">Deposit</button>
+                        <a href="{{route('check_balance')}}" class="btn btn-primary">Check Balance</a>
                     </div>
                 </form>
             </div>
