@@ -68,12 +68,10 @@ class AccountController extends Controller
             return redirect()->route('withdraw')
                          ->with('success', 'Amount withdrawn successfully !');
 
-        } catch (\Exception $e){
+        } catch(\Exception $e){
             // 'status' => '',
-            return response()->json([
-                'error' => 'Failed to withdraw amount. Please verify account details and try again after sometime !',
-                'message' => $e->getMessage(),
-                'data' => $debitDetails]);
+            return redirect()->route('withdraw')
+                         ->with('error', 'Failed to withdraw amount. Please verify account details and try again after sometime !');
         }
     }
 
@@ -87,8 +85,36 @@ class AccountController extends Controller
         return view('pages.close_account');
     }
 
-    public function checkBalance()
+    public function checkBalancePage()
     {
         return view('pages.check_balance');
+    }
+
+    public function checkBalance(Request $request)
+    {
+        $details = [
+            'account_number' => $request->input('account_number'),
+            'customer_id' => AccountHistory::getCustomerId($request->input('account_number')),
+            'mobile_number' => $request->input('mobile'),
+            'utr_number' => BankController::generateUtrNumber(),
+            'transaction_type' => 'balance_check'
+        ];
+
+        try {
+            $availableBalance = AccountHistory::getAvailableBalance($details['account_number']);
+            
+            if($availableBalance){
+                return redirect()->route('check_balance')
+                    ->with('balance', $availableBalance);
+            } else {
+                return redirect()->route('check_balance')
+                         ->with('error', 'Failed to fetch available balance. Please verify account details and try again after sometime !');
+            }
+
+        } catch (\Exception $e){
+            // 'status' => '',
+            return redirect()->route('check_balance')
+                         ->with('error', 'Failed to fetch available balance. Please verify account details and try again after sometime !');
+        }
     }
 }

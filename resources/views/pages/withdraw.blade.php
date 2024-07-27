@@ -36,8 +36,10 @@
                         <label for="payee" class="form-label">Payee</label>
                         <input type="text" id="payee" name="payee" class="form-control" placeholder="Enter your name" required>
                     </div>
-
-                    <button type="submit" class="btn btn-primary">Withdraw</button>
+                    <div class="mb-3">
+                        <button type="submit" class="btn btn-primary">Withdraw</button>
+                        <a href="{{route('check_balance')}}" class="btn btn-warning">Check Balance</a>
+                    </div>
                 </form>
             </div>
         </div>
