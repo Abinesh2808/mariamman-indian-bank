@@ -35,7 +35,7 @@
 </head>
 <body class="position-sticky">
     <x-header/>
-    <x-navbar2/>
+    <x-navbar data="MARIAMMAN INDIAN BANK - Your Banking Partner !"/>
     <script src="{{ asset('bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <div class="container-fluid mt-1">
         <div class="row px-4 m-2 mx-md-4">

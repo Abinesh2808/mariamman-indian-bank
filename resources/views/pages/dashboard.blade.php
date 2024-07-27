@@ -35,7 +35,7 @@
 </head>
 <body class="position-sticky">
     <x-header/>
-    <x-navbar2/>
+    <x-navbar data="BANKING AT YOUR FINGERTIPS"/>
     <script src="{{ asset('bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <div class="container-fluid mt-3">
         <div class="row">

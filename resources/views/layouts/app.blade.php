@@ -35,7 +35,7 @@
 </head>
 <body class="position-sticky">
     <x-header/>
-    <x-navbar/>
+    <x-navbar data="MARIAMMAN INDIAN BANK - Your Banking Partner !"/>
     <div class="container-fluid mt-1">
         @yield('content')
     </div>
