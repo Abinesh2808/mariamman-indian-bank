@@ -21,7 +21,7 @@
                     </div>
                     <div>
                         <a href="{{route('login')}}" class="btn btn-primary" style="margin-right: 10px;">Login</button>
-                        <a href="{{route('register')}}" class="btn btn-secondary">Create another account</a>
+                        <a href="{{route('register')}}" class="btn btn-danger">Create another account</a>
                     </div>
                 @endif
 
