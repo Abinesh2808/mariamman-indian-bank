@@ -29,19 +29,25 @@ class LoginController extends Controller
                 'id_card_number' => $request->input('id_no'),
                 'family_income' => $request->input('family_income'),
                 'password' => Hash::make($request->input('password')),
-                'account_number' => BankController::generate_account_number(), 
+                'account_number' => BankController::generate_account_number(),
                 'customer_id' => BankController::generate_customer_id() 
             ];
-            
+
         try {
             Customer::create($customerData);
-            return response()->json(['message' => 'Customer registered successfully',
-                                    'data' => $customerData]);
+            // return response()->json(['message' => 'Customer registered successfully',
+            //                         'data' => $customerData]);
+            return redirect()->route('register')
+                         ->with('success', 'Account created successfully')
+                         ->with('account_number', $customerData['account_number'])
+                         ->with('customer_id', $customerData['customer_id']);
         } catch(\Exception $e){
-            return response()->json([
-                'error' => 'Failed to register customer',
-                'message' => $e->getMessage(),
-                'data' => $customerData]);
+            // return response()->json([
+            //     'error' => 'Failed to register customer',
+            //     'message' => $e->getMessage(),
+            //     'data' => $customerData]);
+            return redirect()->route('register')
+                         ->with('error', 'Failed to register customer. Please try again after sometime !');
         }
         
     }
