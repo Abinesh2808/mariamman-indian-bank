@@ -19,11 +19,15 @@
                     </div>
                     <div class="mb-3">
                         <label for="name" class="form-label">Father name</label>
-                        <input type="text" id="lname" name="father-name" class="form-control" placeholder="Enter your father name" required>
+                        <input type="text" id="fname" name="father-name" class="form-control" placeholder="Enter your father name" required>
                     </div>
                     <div class="mb-3">
                         <label for="name" class="form-label">Mother name</label>
-                        <input type="text" id="lname" name="mother-name" class="form-control" placeholder="Enter your mother name">
+                        <input type="text" id="mname" name="mother-name" class="form-control" placeholder="Enter your mother name">
+                    </div>
+                    <div class="mb-3">
+                        <label for="dob" class="form-label">Date of birth</label>
+                        <input type="date" id="dob" name="date-of-birth" class="form-control" required>
                     </div>
                     <div class="mb-3">
                         <label for="mobile" class="form-label">Mobile number</label>
@@ -36,6 +40,19 @@
                     <div class="mb-3">
                         <label for="address" class="form-label">Address</label>
                         <textarea id="address" name="address" class="form-control" placeholder="Enter your address" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_card_type" class="form-label">ID card type</label>
+                        <select id="id_card_type" name="id_card_type" class="form-select" required>
+                            <option value="" disabled selected>--- ID card type --- </option>
+                            <option value="aadhaar">Aadhaar</option>
+                            <option value="pan">PAN</option>
+                            <option value="voter_id">Voter ID</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_no" class="form-label">ID card number</label>
+                        <input type="text" id="id_no" name="id_no" class="form-control" placeholder="Enter your ID card number" required>
                     </div>
                     <div class="mb-3">
                         <label for="email" class="form-label">Family income</label>
