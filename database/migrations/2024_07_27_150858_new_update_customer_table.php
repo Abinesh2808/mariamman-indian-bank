@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class RenameIdCardNumberInCustomersTable extends Migration
+class NewUpdateCustomerTable extends Migration
 {
     /**
      * Run the migrations.
@@ -14,7 +14,7 @@ class RenameIdCardNumberInCustomersTable extends Migration
     public function up()
     {
         Schema::table('customers', function (Blueprint $table) {
-            $table->renameColumn('id_card_number', 'id_Card_number');
+            $table->string('mother_name')->nullable()->change();
         });
     }
 

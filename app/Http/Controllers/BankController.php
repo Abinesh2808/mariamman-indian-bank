@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use app\models\customer;
+use App\Models\Customer;
 
 class BankController extends Controller
 {
@@ -19,13 +19,17 @@ class BankController extends Controller
         return view('pages.contactus');
     }
 
-    public function generate_account_number()
+    public static function generate_account_number()
     {
-        $accountNumberPrefix = env('ACCOUNT_NUMBER_PREFIX');
-        $latestAccountNumber = customer::getLatestAccountNumber();
+        $accountNumberPrefix = env("ACCOUNT_NUMBER_PREFIX", "");
+        $latestAccountNumber = Customer::getLatestAccountNumber();
 
-        $newAccountnumber = (int)$latestAccountNumber + 1;
-
-        return $newAccountnumber;
+        if($latestAccountNumber){
+            $newAccountnumber = (int)$latestAccountNumber + 1;
+            return $newAccountnumber;
+        } else {
+            $newAccountnumber = (String)$accountNumberPrefix."00001";
+            return (int)$newAccountnumber;
+        }
     }
 }

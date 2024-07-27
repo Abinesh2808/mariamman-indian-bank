@@ -10,63 +10,77 @@
                 <form action="{{ route('register') }}" method="POST">
                     @csrf
                     <div class="mb-3">
-                        <label for="name" class="form-label">First name</label>
-                        <input type="text" id="fname" name="fname" class="form-control" placeholder="Enter your first name" required>
+                        <label for="fname" class="form-label">First name</label>
+                        <input type="text" id="fname" name="fname" class="form-control" placeholder="Enter your first name" value="{{old('fname')}}" required>
                     </div>
+
                     <div class="mb-3">
-                        <label for="name" class="form-label">Last name</label>
-                        <input type="text" id="lname" name="lname" class="form-control" placeholder="Enter your last name" required>
+                        <label for="lname" class="form-label">Last name</label>
+                        <input type="text" id="lname" name="lname" class="form-control" placeholder="Enter your last name" value="{{old('lname')}}" required>
                     </div>
+
                     <div class="mb-3">
-                        <label for="name" class="form-label">Father name</label>
-                        <input type="text" id="fname" name="father-name" class="form-control" placeholder="Enter your father name" required>
+                        <label for="father_name" class="form-label">Father name</label>
+                        <input type="text" id="father_name" name="father_name" class="form-control" placeholder="Enter your father name" value="{{old('father_name')}}" required>
                     </div>
+
                     <div class="mb-3">
-                        <label for="name" class="form-label">Mother name</label>
-                        <input type="text" id="mname" name="mother-name" class="form-control" placeholder="Enter your mother name">
+                        <label for="mother_name" class="form-label">Mother name</label>
+                        <input type="text" id="mother_name" name="mother_name" class="form-control" placeholder="Enter your mother name" value="{{old('mother_name')}}">
                     </div>
+
                     <div class="mb-3">
                         <label for="dob" class="form-label">Date of birth</label>
-                        <input type="date" id="dob" name="date-of-birth" class="form-control" required>
+                        <input type="date" id="dob" name="date_of_birth" class="form-control" value="{{old('date_of_birth')}}" required>
                     </div>
+
                     <div class="mb-3">
                         <label for="mobile" class="form-label">Mobile number</label>
-                        <input type="text" id="mobile" name="mobile" class="form-control" placeholder="Enter your mobile number" required>
+                        <input type="text" id="mobile" name="mobile" class="form-control" placeholder="Enter your mobile number" value="{{old('mobile')}}" required>
                     </div>
+
                     <div class="mb-3">
                         <label for="email" class="form-label">Email address</label>
-                        <input type="text" id="email" name="email" class="form-control" placeholder="Enter your email" required>
+                        <input type="text" id="email" name="email" class="form-control" placeholder="Enter your email" value="{{old('email')}}" required>
                     </div>
+
                     <div class="mb-3">
                         <label for="address" class="form-label">Address</label>
-                        <textarea id="address" name="address" class="form-control" placeholder="Enter your address" rows="3"></textarea>
+                        <textarea id="address" name="address" class="form-control" placeholder="Enter your address" rows="3" required value="{{old('address')}}"></textarea>
                     </div>
+
                     <div class="mb-3">
                         <label for="id_card_type" class="form-label">ID card type</label>
                         <select id="id_card_type" name="id_card_type" class="form-select" required>
-                            <option value="" disabled selected>--- ID card type --- </option>
-                            <option value="aadhaar">Aadhaar</option>
-                            <option value="pan">PAN</option>
-                            <option value="voter_id">Voter ID</option>
+                            <option value="" disabled selected>--- ID card type ---</option>
+                            <option value="aadhaar" {{old('id_card_type') == 'aadhaar' ? 'selected' : ''}}>Aadhaar</option>
+                            <option value="pan" {{old('id_card_type') == 'pan' ? 'selected' : ''}}>PAN</option>
+                            <option value="voter_id" {{old('id_card_type') == 'voter_id' ? 'selected' : ''}}>Voter ID</option>
                         </select>
                     </div>
+
                     <div class="mb-3">
                         <label for="id_no" class="form-label">ID card number</label>
-                        <input type="text" id="id_no" name="id_no" class="form-control" placeholder="Enter your ID card number" required>
+                        <input type="text" id="id_no" name="id_no" class="form-control" placeholder="Enter your ID card number" value="{{old('id_no')}}" required>
                     </div>
+
                     <div class="mb-3">
-                        <label for="email" class="form-label">Family income</label>
-                        <input type="text" id="email" name="email" class="form-control" placeholder="Enter your family income" required>
+                        <label for="family_income" class="form-label">Family income</label>
+                        <input type="text" id="family_income" name="family_income" class="form-control" placeholder="Enter your family income" value="{{old('family_income')}}" required>
                     </div>
+
                     <div class="mb-3">
                         <label for="password" class="form-label">Netbanking password</label>
                         <input type="password" id="password" name="password" class="form-control" placeholder="Enter your netbanking password" required>
                     </div>
+
                     <div class="mb-3">
                         <label for="password_confirmation" class="form-label">Confirm Password</label>
                         <input type="password" id="password_confirmation" name="password_confirmation" class="form-control" placeholder="Confirm your password" required>
                     </div>
+
                     <button type="submit" class="btn btn-primary">Register</button>
+
                 </form>
                 <div class="mt-3 text-center">
                     <span>Already have an account? <a href="{{ route('login') }}">Login here</a></small>

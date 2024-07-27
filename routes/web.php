@@ -24,6 +24,7 @@ Route::view('/welcome', 'layouts.welcome');
 
 #Login routes
 Route::get('/register', [LoginController::class, 'register'])->name('register');
+Route::post('/register', [LoginController::class, 'registerCustomer']);
 Route::get('/login', [LoginController::class, 'login'])->name('login');
 
 
