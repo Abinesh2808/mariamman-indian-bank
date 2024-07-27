@@ -34,4 +34,33 @@ class AccountHistory extends Model
         }
 
     }
+
+    public static function getStatement($accountNumber, $fromDate = null, $toDate = null)
+    {
+        $customerId = self::getCustomerId($accountNumber);
+
+        if ($customerId){
+            if (!is_null($fromDate) && !is_null($toDate)) {
+                $statement = AccountHistory::where('customer_id', $customerId)
+                                     ->whereDate('transaction_date', '>=', $fromDate)
+                                     ->whereDate('transaction_date', '<=', $toDate);
+                return $statement->get();
+            } elseif (!is_null($fromDate)) {
+                $statement = AccountHistory::where('customer_id', $customerId)
+                                     ->whereDate('transaction_date', '>=', $fromDate);
+                return $statement->get();
+            } elseif (!is_null($toDate)) {
+                $statement = AccountHistory::where('customer_id', $customerId)
+                                     ->whereDate('transaction_date', '<=', $toDate);
+                return $statement->get();
+            } else {
+                $statement = AccountHistory::where('customer_id', $customerId);
+                return $statement->get();
+            }
+        } else {
+            return null;
+        }
+    }
+
+
 }   

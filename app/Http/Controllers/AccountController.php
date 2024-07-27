@@ -7,9 +7,39 @@ use App\Http\Controllers\BankController;
 
 class AccountController extends Controller
 {
-    public function getStatement()
+    public function getStatementPage()
     {
         return view('pages.statement');
+    }
+
+    public function getStatement(Request $request)
+    {
+        $details = [
+            'account_number' => $request->input('account_number'),
+            'customer_id' => AccountHistory::getCustomerId($request->input('account_number')),
+            'mobile_number' => $request->input('mobile'),
+            'utr_number' => BankController::generateUtrNumber(),
+            'transaction_type' => 'statement',
+            'statement_from' => $request->input('fromDate'),
+            'statement_to' => $request->input('toDate')
+        ];
+
+        try {
+            $statement = AccountHistory::getStatement($details['account_number']);
+            
+            if($statement){
+                return redirect()->route('statement')
+                    ->with('account_statement', $statement);
+            } else {
+                return redirect()->route('statement')
+                         ->with('error', 'Failed to fetch account statement. Please verify account details and try again after sometime !');
+            }
+
+        } catch (\Exception $e){
+            // 'status' => '',
+            return redirect()->route('statement')
+                         ->with('error', 'Failed to fetch account statement. Please verify account details and try again after sometime !');
+        }
     }
 
     public function dashboard()
