@@ -29,8 +29,8 @@ class LoginController extends Controller
                 'id_card_number' => $request->input('id_no'),
                 'family_income' => $request->input('family_income'),
                 'password' => Hash::make($request->input('password')),
-                'account_number' => BankController::generate_account_number(),
-                'customer_id' => BankController::generate_customer_id() 
+                'account_number' => BankController::generateAccountNumber(),
+                'customer_id' => BankController::generateCustomerId() 
             ];
 
         try {

@@ -30,8 +30,10 @@ Route::get('/login', [LoginController::class, 'login'])->name('login');
 
 #Account routes
 Route::get('/statement', [AccountController::class, 'getStatement'])->name('statement');
-Route::get('/deposit', [AccountController::class, 'depositAmount'])->name('deposit');
-Route::get('/withdraw', [AccountController::class, 'withdrawAmount'])->name('withdraw');
+Route::get('/deposit', [AccountController::class, 'depositAmountPage'])->name('deposit');
+Route::post('/deposit', [AccountController::class, 'depositAmount']);
+Route::get('/withdraw', [AccountController::class, 'withdrawAmountPage'])->name('withdraw');
+Route::post('/withdraw', [AccountController::class, 'withdrawAmount']);
 Route::get('/update_account', [AccountController::class, 'updateAccount'])->name('update_account');
 Route::get('/close_account', [AccountController::class, 'closeAccount'])->name('close_account');
 Route::get('/check_balance', [AccountController::class, 'checkBalance'])->name('check_balance');

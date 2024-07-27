@@ -19,7 +19,7 @@ class BankController extends Controller
         return view('pages.contactus');
     }
 
-    public static function generate_account_number()
+    public static function generateAccountNumber()
     {
         $accountNumberPrefix = env("ACCOUNT_NUMBER_PREFIX", "");
         $latestAccountNumber = Customer::getLatestAccountNumber();
@@ -33,7 +33,7 @@ class BankController extends Controller
         }
     }
 
-    public static function generate_customer_id()
+    public static function generateCustomerId()
     {
         $ifscPrefix = env("IFSC_PREFIX", "");
 
@@ -44,5 +44,11 @@ class BankController extends Controller
         } while(Customer::checkCustomerIDPresence($customerID));
         
         return $customerID;
+    }
+
+    public static function generateUtrNumber()
+    {
+        $utrNumber = substr(uniqid(mt_rand(), true), 0, 12);
+        return $utrNumber;
     }
 }
