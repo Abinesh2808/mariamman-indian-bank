@@ -36,6 +36,7 @@ Route::get('/check-auth', function() {
 
 // Authenticated routes
 Route::middleware(['web','auth'])->group(function () {
+    Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
     Route::get('/dashboard', [AccountController::class, 'dashboard'])->name('dashboard');
 
     // Account routes

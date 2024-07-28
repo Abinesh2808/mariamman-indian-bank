@@ -68,14 +68,31 @@ class LoginController extends Controller
 
         $authAttempt = Auth::attempt($credentials);
 
-        if ($authAttempt){
+        $user = Auth::user();
+        Auth::login($user);
+
+        if ($user->is_active) {
             $request->session()->regenerate();
             return redirect()->intended('/dashboard');
+        } else {
+            Auth::logout();
+            return back()->withErrors([
+                'email' => 'Your account is inactive.',
+            ]);
         }
  
         return back()->withErrors([
             'email' => 'The provided credentials do not match our records.',
         ]);
+    }
+
+    public function logout(Request $request)
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('login');
     }
 
     public function verifyRegistration(Request $request)

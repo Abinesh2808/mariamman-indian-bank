@@ -7,6 +7,14 @@
         <ul class="list-inline mb-sm-0">
             <li class="list-inline-item"><a class="text-decoration-none text-muted h6" href="{{ url('login') }}">Netbanking</a></li>
             <li class="list-inline-item"><a class="text-decoration-none text-muted h6" href="{{ url('contactus') }}">Contact Us</a></li>
+            @auth
+            <li class="list-inline-item">
+                <a class="text-decoration-none text-muted h6" href="{{ url('logout') }}">Logout</a>
+                <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                    @csrf
+                </form>
+            </li>
+            @endauth
         </ul>
     </div>
 </header>
