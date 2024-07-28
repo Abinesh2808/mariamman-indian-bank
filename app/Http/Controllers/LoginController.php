@@ -49,7 +49,7 @@ class LoginController extends Controller
             //     'message' => $e->getMessage(),
             //     'data' => $customerData]);
             return redirect()->route('register')
-                         ->with('error', 'Failed to register customer. Please try again after sometime !');
+                         ->with('error', 'Failed to register customer. Please try again after sometime !'.$e);
         }
         
     }

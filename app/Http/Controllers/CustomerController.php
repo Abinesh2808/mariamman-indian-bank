@@ -22,4 +22,5 @@ class CustomerController extends Controller
         $emailId = Customer::where('account_number',$accountNumber)->first();
         return $emailId->email;
     }
+
 }

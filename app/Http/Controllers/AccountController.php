@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 use App\Models\AccountHistory;
+use App\Models\Customer;
 use Illuminate\Http\Request;
 use App\Http\Controllers\BankController;
 use App\Http\Controllers\CustomerController;
@@ -145,9 +146,19 @@ class AccountController extends Controller
         return view('pages.close_account');
     }
 
-    public function closeAccount()
+    public function closeCustomerAccount(Request $request)
     {
-        return view('pages.close_account');
+        $details = [
+            'account_number' => $request->input('account_number'),
+            'customer_id' => AccountHistory::getCustomerId($request->input('account_number')),
+            'date_of_birth' => $request->input('date_of_birth'),
+            'id_card_type' => $request->input('id_card_type'),
+            'id_card_number' => $request->input('id_no'),
+            'reason' => $request->input('reason')
+        ];
+
+        $status = Customer::closeAccount($details);
+        return $status;
     }
 
     public function checkBalancePage()

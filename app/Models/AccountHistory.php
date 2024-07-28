@@ -18,14 +18,14 @@ class AccountHistory extends Model
     {
         $customerId = Customer::where('account_number',$accountNumber)->first();
         
-        return $customerId ? $customerId->id : null;
+        return $customerId ? $customerId->customer_id : null;
     }
 
     public static function getAvailableBalance($accountNumber)
     {   
         $customerId = self::getCustomerId($accountNumber);
         if($customerId){
-            $availableBalance = AccountHistory::where('customer_id', $customerId)
+            $availableBalance = AccountHistory::where('id', $customerId)
                                                 ->orderBy('transaction_date', 'desc')
                                                 ->first();
             return $availableBalance->balance;

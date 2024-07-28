@@ -29,7 +29,7 @@ class CreateCustomersTable extends Migration
             $table->integer('account_number');
             $table->integer('customer_id');
             $table->boolean('is_active');
-            $table->double('balance');
+            $table->string('reason_for_closure')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
