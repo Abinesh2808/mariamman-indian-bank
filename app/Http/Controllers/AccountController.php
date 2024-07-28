@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 use App\Models\AccountHistory;
 use Illuminate\Http\Request;
 use App\Http\Controllers\BankController;
+use App\Http\Controllers\CustomerController;
+use PDF;
+use Mail;
 
 class AccountController extends Controller
 {
@@ -43,6 +46,51 @@ class AccountController extends Controller
                          ->with('error', 'Failed to fetch account statement. Please verify account details and try again after sometime !')
                          ->withInput();
         }
+    }
+
+    public function exportStatementPDF(Request $request)
+    {   
+        $details = [
+            'accountNumber' =>$request->input('account_number'),
+            'fromDate' => $request->input('fromDate'),
+            'toDate' => $request->input('toDate')
+        ];
+        
+
+        $statements = AccountHistory::getStatement($details['accountNumber'], $details['fromDate'], $details['toDate']);
+
+        $pdf = PDF::loadView('pages.statement_pdf', ['details' => $details, 'statements' => $statements]);
+
+        return $pdf->download('account_statement_'.$details['fromDate'].'_'.$details['toDate'].'.pdf');
+    }
+
+    public function sendStatementEmail(Request $request)
+    {   
+        $details = [
+            'accountNumber' =>$request->input('account_number'),
+            'fromDate' => $request->input('fromDate'),
+            'toDate' => $request->input('toDate')
+        ];
+
+        $statements = AccountHistory::getStatement($details['accountNumber'], $details['fromDate'], $details['toDate']);
+
+        $pdf = PDF::loadView('pages.statement_pdf', ['statements' => $statements]);
+
+        $emailID = CustomerController::getEmailId($details['accountNumber']);
+        $ccEmail = env("MAIL_CC", "");
+
+        \Log::info('Sending email to: ' . $emailID);
+        \Log::info('CC email: ' . env("MAIL_CC", ""));
+        \Log::info('mail username: ' . env("MAIL_USERNAME", ""));
+
+        Mail::send('pages.statement_email', ['statements' => $statements, 'details' => $details], function($message) use ($emailID, $pdf, $ccEmail, $details) {
+            $message->to($emailID)
+                    ->cc($ccEmail)
+                    ->subject('Account Statement from '.$details['fromDate'].' to '.$details['toDate'])
+                    ->attachData($pdf->output(), 'account_statement_'.$details['fromDate'].'_'.$details['toDate'].'.pdf');
+        });
+
+        return redirect()->route('statement')->with('success', 'Account statement sent to your email.');
     }
 
     public function dashboard()

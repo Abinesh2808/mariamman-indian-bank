@@ -35,8 +35,8 @@
         <div class="container mt-5 justify-content-center col-12 col-md-8 px-lg-4">
             <h2>Account Statement</h2>
             <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
+                <table class="table table-hover table-sm small">
+                    <thead  class="thead-dark">
                       <tr>
                         <th>Date</th>
                         <th>Particulars</th>
@@ -63,6 +63,19 @@
                         @endif
                     </tbody>
                 </table>
+            </div>
+            <div>
+                <a href="{{route('statement.pdf', ['account_number' => old('account_number'),
+                                                    'mobile' => old('mobile'),
+                                                    'fromDate' => old('fromDate'),
+                                                    'toDate' => old('toDate')])}}" 
+                                                    class="btn btn-secondary">Export to PDF</a>
+                <a href="{{route('statement.email', ['account_number' => old('account_number'),
+                                                    'mobile' => old('mobile'),
+                                                    'fromDate' => old('fromDate'),
+                                                    'toDate' => old('toDate')])}}" 
+                                                    class="btn btn-info">Send via Email</a>
+                
             </div>
         </div>
     @endif

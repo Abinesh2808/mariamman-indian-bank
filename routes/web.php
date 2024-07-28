@@ -31,12 +31,18 @@ Route::get('/login', [LoginController::class, 'login'])->name('login');
 #Account routes
 Route::get('/statement', [AccountController::class, 'getStatementPage'])->name('statement');
 Route::post('/statement', [AccountController::class, 'getStatement']);
+Route::get('/statement/pdf', [AccountController::class, 'exportStatementPDF'])->name('statement.pdf');
+Route::get('/statement/email', [AccountController::class, 'sendStatementEmail'])->name('statement.email');
+
 Route::get('/deposit', [AccountController::class, 'depositAmountPage'])->name('deposit');
 Route::post('/deposit', [AccountController::class, 'depositAmount']);
+
 Route::get('/withdraw', [AccountController::class, 'withdrawAmountPage'])->name('withdraw');
 Route::post('/withdraw', [AccountController::class, 'withdrawAmount']);
+
 Route::get('/update_account', [AccountController::class, 'updateAccount'])->name('update_account');
 Route::get('/close_account', [AccountController::class, 'closeAccount'])->name('close_account');
+
 Route::get('/check_balance', [AccountController::class, 'checkBalancePage'])->name('check_balance');
 Route::post('/check_balance', [AccountController::class, 'checkBalance']);
 
