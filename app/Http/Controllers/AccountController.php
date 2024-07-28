@@ -19,12 +19,12 @@ class AccountController extends Controller
 
     public function getStatement(Request $request)
     {   
-        $validatedData = $request->validate([
-            'account_number' => 'required|string|max:255|exists:customers,account_number',
-            'mobile' => 'required|string|max:10|exists:customers,mobile',
-            'fromDate' => 'required|date',
-            'toDate' => 'required|date',
-        ]);
+        // $validatedData = $request->validate([
+        //     'account_number' => 'required|string|max:255|exists:customers,account_number',
+        //     'mobile' => 'required|string|max:10|exists:customers,mobile',
+        //     'fromDate' => 'required|date',
+        //     'toDate' => 'required|date',
+        // ]);
 
         $details = [
             'account_number' => $request->input('account_number'),
@@ -42,11 +42,11 @@ class AccountController extends Controller
 
     public function exportStatementPDF(Request $request)
     {   
-        $validatedData = $request->validate([
-            'account_number' => 'required|string|max:255|exists:customers,account_number',
-            'fromDate' => 'required|date',
-            'toDate' => 'required|date',
-        ]);
+        // $validatedData = $request->validate([
+        //     'account_number' => 'required|string|max:255|exists:customers,account_number',
+        //     'fromDate' => 'required|date',
+        //     'toDate' => 'required|date',
+        // ]);
 
         $details = [
             'accountNumber' =>$request->input('account_number'),
@@ -64,11 +64,11 @@ class AccountController extends Controller
 
     public function sendStatementEmail(Request $request)
     {   
-        $validatedData = $request->validate([
-            'account_number' => 'required|string|max:255|exists:customers,account_number',
-            'fromDate' => 'required|date',
-            'toDate' => 'required|date',
-        ]);
+        // $validatedData = $request->validate([
+        //     'account_number' => 'required|string|max:255|exists:customers,account_number',
+        //     'fromDate' => 'required|date',
+        //     'toDate' => 'required|date',
+        // ]);
 
         $details = [
             'accountNumber' =>$request->input('account_number'),
@@ -105,12 +105,12 @@ class AccountController extends Controller
 
     public function depositAmount(Request $request)
     {   
-        $validatedData = $request->validate([
-            'account_number' => 'required|string|max:255|exists:customers,account_number',
-            'amount' => 'required|numeric',
-            'description' => 'required|string|max:255',
-            'payer' => 'required|string|max:255',
-        ]);
+        // $validatedData = $request->validate([
+        //     'account_number' => 'required|string|max:255|exists:customers,account_number',
+        //     'amount' => 'required|numeric',
+        //     'description' => 'required|string|max:255',
+        //     'payer' => 'required|string|max:255',
+        // ]);
 
         $creditDetails = [
             'account_number' => $request->input('account_number'),
@@ -141,12 +141,12 @@ class AccountController extends Controller
 
     public function withdrawAmount(Request $request)
     {
-        $validatedData = $request->validate([
-            'account_number' => 'required|string|max:255|exists:customers,account_number',
-            'amount' => 'required|numeric',
-            'description' => 'required|string|max:255',
-            'payee' => 'required|string|max:255',
-        ]);
+        // $validatedData = $request->validate([
+        //     'account_number' => 'required|string|max:255|exists:customers,account_number',
+        //     'amount' => 'required|numeric',
+        //     'description' => 'required|string|max:255',
+        //     'payee' => 'required|string|max:255',
+        // ]);
 
         $debitDetails = [
             'account_number' => $request->input('account_number'),
@@ -182,10 +182,10 @@ class AccountController extends Controller
 
     public function closeCustomerAccount(Request $request)
     {
-        $validatedData = $request->validate([
-            'account_number' => 'required|string|max:255|exists:customers,account_number',
-            'reason' => 'required|string|max:1000',
-        ]);
+        // $validatedData = $request->validate([
+        //     'account_number' => 'required|string|max:255|exists:customers,account_number',
+        //     'reason' => 'required|string|max:1000',
+        // ]);
         
         $details = [
             'account_number' => $request->input('account_number'),
@@ -212,10 +212,10 @@ class AccountController extends Controller
 
     public function checkBalance(Request $request)
     {
-        $validatedData = $request->validate([
-            'account_number' => 'required|string|max:255|exists:customers,account_number',
-            'mobile' => 'required|string|max:10',
-        ]);
+        // $validatedData = $request->validate([
+        //     'account_number' => 'required|string|max:255|exists:customers,account_number',
+        //     'mobile' => 'required|string|max:10',
+        // ]);
 
         $details = [
             'account_number' => $request->input('account_number'),
@@ -224,7 +224,7 @@ class AccountController extends Controller
             'utr_number' => BankController::generateUtrNumber(),
             'transaction_type' => 'balance_check'
         ];
-
+        
         try {
             $availableBalance = AccountHistory::getAvailableBalance($details['account_number']);
             

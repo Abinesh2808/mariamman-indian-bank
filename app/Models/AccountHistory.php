@@ -25,7 +25,7 @@ class AccountHistory extends Model
     {   
         $customerId = self::getCustomerId($accountNumber);
         if($customerId){
-            $availableBalance = AccountHistory::where('id', $customerId)
+            $availableBalance = AccountHistory::where('customer_id', $customerId)
                                                 ->orderBy('transaction_date', 'desc')
                                                 ->first();
             return $availableBalance->balance;
