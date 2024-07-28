@@ -7,7 +7,9 @@ use App\Models\Customer;
 use App\Http\Controllers\BankController;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Log;
 
 
 class LoginController extends Controller
@@ -19,6 +21,22 @@ class LoginController extends Controller
 
     public function registerCustomer(Request $request)
     {   
+        Log::info('Register customer request data:', $request->all());
+        $validatedData = $request->validate([
+            'fname' => 'required|string|max:255',
+            'lname' => 'required|string|max:255',
+            'father_name' => 'required|string|max:255',
+            'mother_name' => 'required|string|max:255',
+            'date_of_birth' => 'required|date',
+            'mobile' => 'required|string|max:10|unique:customers,mobile',
+            'email' => 'required|email|max:255|unique:customers,email',
+            'address' => 'required|string|max:1000',
+            'id_card_type' => 'required|string',
+            'id_no' => 'required|string|max:255',
+            'family_income' => 'required|numeric',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+        Log::info('Validated data:', $validatedData);
         $customerData = [
                 'name' => $request->input('fname') . ' ' . $request->input('lname'),
                 'father_name' => $request->input('father_name'),
@@ -34,9 +52,10 @@ class LoginController extends Controller
                 'account_number' => BankController::generateAccountNumber(),
                 'customer_id' => BankController::generateCustomerId() 
             ];
-
+        Log::info('Customer data before saving:', $customerData);
         try {
             Customer::create($customerData);
+            Log::info('Customer registered successfully:', $customerData);
             // return response()->json(['message' => 'Customer registered successfully',
             //                         'data' => $customerData]);
             return redirect()->route('register')
@@ -44,6 +63,10 @@ class LoginController extends Controller
                          ->with('account_number', $customerData['account_number'])
                          ->with('customer_id', $customerData['customer_id']);
         } catch(\Exception $e){
+            Log::error('Customer registration failed', [
+                'error' => $e->getMessage(),
+                'data' => $customerData
+            ]);
             // return response()->json([
             //     'error' => 'Failed to register customer',
             //     'message' => $e->getMessage(),
