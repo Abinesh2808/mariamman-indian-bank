@@ -27,7 +27,7 @@
                     <input type="password" id="password" name="password" class="form-control" placeholder="Enter your netbanking password">
                 </div>
                 <button type="submit" class="btn btn-primary">Show Account Number</button>
-                <a href="/" class="btn btn-secondary">Cancel</a>
+                <a href="{{url('dashboard')}}" class="btn btn-warning">Cancel</a>
             </div>
         </div>
     </div>

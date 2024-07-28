@@ -34,7 +34,7 @@
                     <p class="form-label mt-3 text-secondary">(OTP/DD/MM/YYY)</p>
                 </div>
                 <button type="submit" class="btn btn-primary">Reset Password</button>
-                <a href="/" class="btn btn-secondary">Cancel</a>
+                <a href="{{url('dashboard')}}" class="btn btn-warning">Cancel</a>
 
         </div>
         </div>

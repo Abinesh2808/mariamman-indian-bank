@@ -22,6 +22,7 @@
                         <input type="text" id="email" name="email" class="form-control" placeholder="Enter your new email ID" value="{{}}">
                     </div>
                     <button type="submit" class="btn btn-primary">Update</button>
+                    <a href="{{url('dashboard')}}" class="btn btn-warning">Cancel</a>
                 </form>
             </div>
         </div>

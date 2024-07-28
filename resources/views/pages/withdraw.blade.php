@@ -40,7 +40,8 @@
                     </div>
                     <div class="mb-3">
                         <button type="submit" class="btn btn-danger">Withdraw</button>
-                        <a href="{{route('check_balance')}}" class="btn btn-primary">Check Balance</a>
+                        <a href="{{url('check_balance')}}" class="btn btn-primary">Check Balance</a>
+                       <a href="{{url('dashboard')}}" class="btn btn-warning">Cancel</a>
                     </div>
                 </form>
             </div>

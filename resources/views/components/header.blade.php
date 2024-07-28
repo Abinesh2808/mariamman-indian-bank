@@ -1,5 +1,5 @@
 <header class="row py-1">
-    <a class="col-12 col-md-6 d-flex align-items-center logo-container text-decoration-none text-dark" href="/">
+    <a class="col-12 col-md-6 d-flex align-items-center logo-container text-decoration-none text-dark" href="/dashboard">
         <img src="{{ asset('no-background-logo.png') }}" alt="Bank Logo">
         <span>MARIAMMAN INDIAN BANK</span>
     </a>

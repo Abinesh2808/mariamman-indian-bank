@@ -52,7 +52,8 @@ Route::middleware(['web','auth'])->group(function () {
     Route::post('/withdraw', [AccountController::class, 'withdrawAmount']);
 
     Route::get('/update_account', [AccountController::class, 'updateAccount'])->name('update_account');
-    Route::get('/close_account', [AccountController::class, 'closeAccount'])->name('close_account');
+    Route::get('/close_account', [AccountController::class, 'closeAccountPage'])->name('close_account');
+    Route::post('/close_account', [AccountController::class, 'closeAccount']);
 
     Route::get('/check_balance', [AccountController::class, 'checkBalancePage'])->name('check_balance');
     Route::post('/check_balance', [AccountController::class, 'checkBalance']);

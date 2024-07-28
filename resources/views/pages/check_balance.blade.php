@@ -19,8 +19,9 @@
                     </div>
                     <div class="mb-3">
                         <button type="submit" class="btn btn-primary">Check Balance</button>
-                        <a href="{{route('deposit')}}" class="btn btn-success">Deposit</a>
-                        <a href="{{route('withdraw')}}" class="btn btn-danger">Withdraw</a>
+                        <a href="{{url('deposit')}}" class="btn btn-success">Deposit</a>
+                        <a href="{{url('withdraw')}}" class="btn btn-danger">Withdraw</a>
+                        <a href="{{url('dashboard')}}" class="btn btn-warning">Cancel</a>
                     </div>
                     @if (session('balance'))
                         <div class="alert alert-success">

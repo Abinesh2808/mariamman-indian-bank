@@ -140,6 +140,11 @@ class AccountController extends Controller
         return view('pages.update_account');
     }
 
+    public function closeAccountPage()
+    {
+        return view('pages.close_account');
+    }
+
     public function closeAccount()
     {
         return view('pages.close_account');

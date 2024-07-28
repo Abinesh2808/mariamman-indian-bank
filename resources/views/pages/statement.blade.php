@@ -39,6 +39,7 @@
                         <input type="date" id="toDate" name="toDate" class="form-control" value="{{request('toDate')}}">
                     </div>
                     <button type="submit" class="btn btn-primary">Get Statement</button>
+                    <a href="{{url('dashboard')}}" class="btn btn-warning">Cancel</a>
                 </form>
             </div>
         </div>
