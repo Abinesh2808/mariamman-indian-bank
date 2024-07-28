@@ -6,6 +6,17 @@
     <div class="container mt-5">
         <div class="row justify-content-center">
             <div class="col-12 col-md-8">
+                @if (session('success'))
+                    <div class="alert alert-success">
+                        {{ session('success') }}
+                    </div>
+                @endif
+
+                @if (session('error'))
+                    <div class="alert alert-danger">
+                        {{ session('error') }}
+                    </div>
+                @endif
                 <h2 class="mb-4">Account Statement</h2>
                 <form action="{{ route('statement') }}" method="POST">
                     @csrf

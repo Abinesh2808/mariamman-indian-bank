@@ -74,7 +74,7 @@ class AccountController extends Controller
 
         $statements = AccountHistory::getStatement($details['accountNumber'], $details['fromDate'], $details['toDate']);
 
-        $pdf = PDF::loadView('pages.statement_pdf', ['statements' => $statements]);
+        $pdf = PDF::loadView('pages.statement_pdf', ['details' => $details, 'statements' => $statements]);
 
         $emailID = CustomerController::getEmailId($details['accountNumber']);
         $ccEmail = env("MAIL_CC", "");
