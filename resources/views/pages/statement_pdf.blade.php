@@ -10,7 +10,7 @@
         <h2 class="text-center">Account Statement</h2>
         <p class="text-center">Account statement from {{ $details['fromDate'] }} to {{ $details['toDate'] }}.</p> 
 
-        <table class="table table-bordered table-sm small">
+        <table class="table table-bordered">
             <thead class="thead-dark">
                 <tr>
                     <th>Date</th>
