@@ -27,25 +27,29 @@ class AccountController extends Controller
             'statement_to' => $request->input('toDate')
         ];
 
-        try {
-            $statement = AccountHistory::getStatement($details['account_number'], $details['statement_from'], $details['statement_to']);
+        $account_statement = AccountHistory::getStatementonPage($details['account_number'], $details['statement_from'], $details['statement_to']);
+                return view('pages.statement', ['account_statement' => $account_statement])->with($request->input());
+        // try {
+        //     $statement = AccountHistory::getStatementonPage($details['account_number'], $details['statement_from'], $details['statement_to']);
             
-            if($statement){
-                return redirect()->route('statement')
-                    ->with('account_statement', $statement)
-                    ->withInput();
-            } else {
-                return redirect()->route('statement')
-                         ->with('error', 'Failed to fetch account statement. Please verify account details and try again after sometime !')
-                         ->withInput();
-            }
+        //     if($statement){
+        //         $account_statement = AccountHistory::getStatementonPage($details['account_number'], $details['statement_from'], $details['statement_to']);
+        //         return view('pages.statement', ['account_statement' => $account_statement])->with($request->input());
+        //         // return redirect()->route('statement')
+        //         //     ->with('account_statement', $statement)
+        //         //     ->withInput();
+        //     } else {
+        //         return redirect()->route('statement')
+        //                  ->with('error', 'Failed to fetch account statement. Please verify account details and try again after sometime !')
+        //                  ->withInput();
+        //     }
 
-        } catch (\Exception $e){
-            // 'status' => '',
-            return redirect()->route('statement')
-                         ->with('error', 'Failed to fetch account statement. Please verify account details and try again after sometime !')
-                         ->withInput();
-        }
+        // } catch (\Exception $e){
+        //     // 'status' => '',
+        //     return redirect()->route('statement')
+        //                  ->with('error', 'Failed to fetch account statement. Please verify account details and try again after sometime !')
+        //                  ->withInput();
+        // }
     }
 
     public function exportStatementPDF(Request $request)

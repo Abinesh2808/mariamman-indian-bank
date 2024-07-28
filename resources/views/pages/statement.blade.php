@@ -22,19 +22,19 @@
                     @csrf
                     <div class="mb-3">
                         <label for="account_number" class="form-label">Account Number</label>
-                        <input type="text" id="account_number" name="account_number" class="form-control" placeholder="Enter your account number" value="{{old('account_number')}}" required>
+                        <input type="text" id="account_number" name="account_number" class="form-control" placeholder="Enter your account number" value="{{request('account_number')}}" required>
                     </div>
                     <div class="mb-3">
                         <label for="mobile" class="form-label">Mobile number</label>
-                        <input type="text" id="mobile" name="mobile" class="form-control" placeholder="Enter your mobile number" value="{{old('mobile')}}" required>
+                        <input type="text" id="mobile" name="mobile" class="form-control" placeholder="Enter your mobile number" value="{{request('mobile')}}" required>
                     </div>
                     <div class="mb-3">
                         <label for="fromDate" class="form-label">From Date</label>
-                        <input type="date" id="fromDate" name="fromDate" class="form-control" value="{{old('fromDate')}}">
+                        <input type="date" id="fromDate" name="fromDate" class="form-control" value="{{request('fromDate')}}">
                     </div>
                     <div class="mb-3">
                         <label for="toDate" class="form-label">To Date</label>
-                        <input type="date" id="toDate" name="toDate" class="form-control" value="{{old('toDate')}}">
+                        <input type="date" id="toDate" name="toDate" class="form-control" value="{{request('toDate')}}">
                     </div>
                     <button type="submit" class="btn btn-primary">Get Statement</button>
                 </form>
@@ -42,7 +42,7 @@
         </div>
     </div>
 
-    @if (session('account_statement'))
+    @if ($account_statement)    
         <div class="container mt-5 justify-content-center col-12 col-md-8 px-lg-4">
             <h2>Account Statement</h2>
             <div class="table-responsive">
@@ -57,8 +57,8 @@
                       </tr>
                     </thead>
                     <tbody>
-                        @if (count(session('account_statement')) > 0)
-                            @foreach(session('account_statement') as $statements)
+                        @if (count($account_statement) > 0)
+                            @foreach($account_statement as $statements)
                               <tr>
                                 <td>{{$statements->transaction_date}}</td>
                                 <td>{{$statements->description}}</td>
@@ -75,19 +75,22 @@
                     </tbody>
                 </table>
             </div>
+            <div class="d-flex justify-content-end">
+                {{ $account_statement->appends(request()->input())->links('vendor.pagination.bootstrap-4') }}
+            </div>
             <div>
-                <a href="{{route('statement.pdf', ['account_number' => old('account_number'),
-                                                    'mobile' => old('mobile'),
-                                                    'fromDate' => old('fromDate'),
-                                                    'toDate' => old('toDate')])}}" 
-                                                    class="btn btn-secondary">Export to PDF</a>
-                <a href="{{route('statement.email', ['account_number' => old('account_number'),
-                                                    'mobile' => old('mobile'),
-                                                    'fromDate' => old('fromDate'),
-                                                    'toDate' => old('toDate')])}}" 
-                                                    class="btn btn-info">Send via Email</a>
-                
+                <a href="{{route('statement.pdf', ['account_number' => request('account_number'),
+                                                    'mobile' => request('mobile'),
+                                                    'fromDate' => request('fromDate'),
+                                                    'toDate' => request('toDate')])}}" 
+                                                    class="btn btn-success">Export to PDF</a>
+                <a href="{{route('statement.email', ['account_number' => request('account_number'),
+                                                    'mobile' => request('mobile'),
+                                                    'fromDate' => request('fromDate'),
+                                                    'toDate' => request('toDate')])}}" 
+                                                    class="btn btn-danger">Send via Email</a>
             </div>
         </div>
+        
     @endif
 @endsection
