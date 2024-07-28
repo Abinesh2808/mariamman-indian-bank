@@ -8,6 +8,7 @@ use App\Http\Controllers\BankController;
 use App\Http\Controllers\CustomerController;
 use PDF;
 use Mail;
+use Illuminate\Support\Facades\Auth;
 
 class AccountController extends Controller
 {
@@ -138,7 +139,7 @@ class AccountController extends Controller
 
     public function updateAccount()
     {
-        return view('pages.update_account');
+        return view('pages.update_account',['user' => Auth::user()]);
     }
 
     public function closeAccountPage()
@@ -158,7 +159,12 @@ class AccountController extends Controller
         ];
 
         $status = Customer::closeAccount($details);
-        return $status;
+        
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('login');
     }
 
     public function checkBalancePage()

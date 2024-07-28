@@ -94,14 +94,4 @@ class LoginController extends Controller
 
         return redirect()->route('login');
     }
-
-    public function verifyRegistration(Request $request)
-    {
-        return "Verifying registration";
-    }
-
-    public function validateLogin(Request $request)
-    {
-        return "Validating login";
-    }
 }
