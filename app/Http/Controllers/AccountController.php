@@ -83,10 +83,6 @@ class AccountController extends Controller
         $emailID = CustomerController::getEmailId($details['accountNumber']);
         $ccEmail = env("MAIL_CC", "");
 
-        \Log::info('Sending email to: ' . $emailID);
-        \Log::info('CC email: ' . env("MAIL_CC", ""));
-        \Log::info('mail username: ' . env("MAIL_USERNAME", ""));
-
         Mail::send('pages.statement_email', ['statements' => $statements, 'details' => $details], function($message) use ($emailID, $pdf, $ccEmail, $details) {
             $message->to($emailID)
                     ->cc($ccEmail)
