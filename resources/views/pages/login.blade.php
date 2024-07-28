@@ -18,7 +18,7 @@
                         <input type="password" id="password" name="password" class="form-control" placeholder="Enter your password" required>
                     </div>
                     <button type="submit" class="btn btn-primary">Login</button>
-                    <span class="ms-4 text-muted">(If you want to login to existing account, use username:abinesh, password:admin)</span>
+                    <span class="ms-4 text-muted">(If you want to login to existing account, use username:abinesh.s@zohomail.in, password:admin)</span>
                 </form>
                 <div class="mt-2 text-center">
                     <div class="d-flex justify-content-center">

@@ -5,7 +5,9 @@
     </a>
     <div class="col-12 col-md-6 d-flex justify-content-center justify-content-md-flex-end align-items-center">
         <ul class="list-inline mb-sm-0">
+            @guest
             <li class="list-inline-item"><a class="text-decoration-none text-muted h6" href="{{ url('login') }}">Netbanking</a></li>
+            @endguest
             <li class="list-inline-item"><a class="text-decoration-none text-muted h6" href="{{ url('contactus') }}">Contact Us</a></li>
             @auth
             <li class="list-inline-item">
