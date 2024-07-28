@@ -12,10 +12,16 @@
                     <div class="mb-3">
                         <label for="account_number" class="form-label">Account Number</label>
                         <input type="text" id="account_number" name="account_number" class="form-control" placeholder="Enter your account number" required>
+                        @error('account_number')
+                            <div class="text-danger">{{ $message }}</div>
+                        @enderror
                     </div>
                     <div class="mb-3">
                         <label for="mobile" class="form-label">Mobile number</label>
                         <input type="text" id="mobile" name="mobile" class="form-control" placeholder="Enter your mobile number" required>
+                        @error('mobile')
+                            <div class="text-danger">{{ $message }}</div>
+                        @enderror
                     </div>
                     <div class="mb-3">
                         <button type="submit" class="btn btn-primary">Check Balance</button>

@@ -25,18 +25,30 @@
                     <div class="mb-3">
                         <label for="account_number" class="form-label">Account Number</label>
                         <input type="text" id="account_number" name="account_number" class="form-control" placeholder="Enter your account number" value="{{old('account_number')}}" required>
+                        @error('account_number')
+                            <div class="text-danger">{{ $message }}</div>
+                        @enderror
                     </div>
                     <div class="mb-3">
                         <label for="mobile" class="form-label">Mobile number</label>
                         <input type="text" id="mobile" name="mobile" class="form-control" placeholder="Enter your mobile number" value="{{old('mobile')}}" required>
+                        @error('amount')
+                            <div class="text-danger">{{ $message }}</div>
+                        @enderror
                     </div>
                     <div class="mb-3">
                         <label for="amount" class="form-label">Amount</label>
                         <input type="number" id="amount" name="amount" class="form-control" placeholder="Enter the amount to withdraw" required>
+                        @error('description')
+                            <div class="text-danger">{{ $message }}</div>
+                        @enderror
                     </div>
                     <div class="mb-3">
                         <label for="payee" class="form-label">Payee</label>
                         <input type="text" id="payee" name="payee" class="form-control" placeholder="Enter your name" required>
+                        @error('payee')
+                            <div class="text-danger">{{ $message }}</div>
+                        @enderror
                     </div>
                     <div class="mb-3">
                         <button type="submit" class="btn btn-danger">Withdraw</button>

@@ -53,7 +53,6 @@
                 <div class="card p-3">
                     <div class="card-body">
                         <ul class="list-inline">
-                            <li><a class="text-decoration-none m-3" href="{{ url('whoami') }}">Forgot account number</a></li>
                             <li><a class="text-decoration-none m-3" href="{{ url('findme') }}">Forgot password</a></li>
                         </ul>
                     </div>

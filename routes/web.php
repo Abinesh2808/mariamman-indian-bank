@@ -27,6 +27,12 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [LoginController::class, 'login']);
     Route::get('/register', [LoginController::class, 'register'])->name('register');
     Route::post('/register', [LoginController::class, 'registerCustomer']);
+
+    // Customer routes
+    Route::get('/findme', [CustomerController::class, 'forgotPasswordPage'])->name('findme');
+    Route::post('/findme', [CustomerController::class, 'forgotPassword']);
+    Route::post('/update-password', [CustomerController::class, 'updatePassword'])->name('update.password');
+
 });
 
 Route::get('/check-auth', function() {
@@ -58,10 +64,6 @@ Route::middleware(['web','auth'])->group(function () {
     Route::get('/check_balance', [AccountController::class, 'checkBalancePage'])->name('check_balance');
     Route::post('/check_balance', [AccountController::class, 'checkBalance']);
 });
-
-// Customer routes
-Route::get('/whoami', [CustomerController::class, 'forgotAccountNumber'])->name('whoami');
-Route::get('/findme', [CustomerController::class, 'forgotPassword'])->name('findme');
 
 // Bank routes
 Route::get('/aboutus', [BankController::class, 'aboutUs'])->name('aboutus');

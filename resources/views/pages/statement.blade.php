@@ -25,18 +25,30 @@
                     <div class="mb-3">
                         <label for="account_number" class="form-label">Account Number</label>
                         <input type="text" id="account_number" name="account_number" class="form-control" placeholder="Enter your account number" value="{{request('account_number')}}" required>
+                        @error('account_number')
+                            <div class="text-danger">{{ $message }}</div>
+                        @enderror
                     </div>
                     <div class="mb-3">
                         <label for="mobile" class="form-label">Mobile number</label>
                         <input type="text" id="mobile" name="mobile" class="form-control" placeholder="Enter your mobile number" value="{{request('mobile')}}" required>
+                        @error('mobile')
+                            <div class="text-danger">{{ $message }}</div>
+                        @enderror
                     </div>
                     <div class="mb-3">
                         <label for="fromDate" class="form-label">From Date</label>
                         <input type="date" id="fromDate" name="fromDate" class="form-control" value="{{request('fromDate')}}">
+                        @error('from_date')
+                            <div class="text-danger">{{ $message }}</div>
+                        @enderror
                     </div>
                     <div class="mb-3">
                         <label for="toDate" class="form-label">To Date</label>
                         <input type="date" id="toDate" name="toDate" class="form-control" value="{{request('toDate')}}">
+                        @error('to_date')
+                            <div class="text-danger">{{ $message }}</div>
+                        @enderror
                     </div>
                     <button type="submit" class="btn btn-primary">Get Statement</button>
                     <a href="{{url('dashboard')}}" class="btn btn-warning">Cancel</a>

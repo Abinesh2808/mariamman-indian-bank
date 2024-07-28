@@ -21,7 +21,6 @@ class LoginController extends Controller
 
     public function registerCustomer(Request $request)
     {   
-        Log::info('Register customer request data:', $request->all());
         $validatedData = $request->validate([
             'fname' => 'required|string|max:255',
             'lname' => 'required|string|max:255',
@@ -36,7 +35,7 @@ class LoginController extends Controller
             'family_income' => 'required|numeric',
             'password' => 'required|string|min:8|confirmed',
         ]);
-        Log::info('Validated data:', $validatedData);
+
         $customerData = [
                 'name' => $request->input('fname') . ' ' . $request->input('lname'),
                 'father_name' => $request->input('father_name'),
@@ -52,7 +51,7 @@ class LoginController extends Controller
                 'account_number' => BankController::generateAccountNumber(),
                 'customer_id' => BankController::generateCustomerId() 
             ];
-        Log::info('Customer data before saving:', $customerData);
+
         try {
             Customer::create($customerData);
             Log::info('Customer registered successfully:', $customerData);
@@ -63,10 +62,6 @@ class LoginController extends Controller
                          ->with('account_number', $customerData['account_number'])
                          ->with('customer_id', $customerData['customer_id']);
         } catch(\Exception $e){
-            Log::error('Customer registration failed', [
-                'error' => $e->getMessage(),
-                'data' => $customerData
-            ]);
             // return response()->json([
             //     'error' => 'Failed to register customer',
             //     'message' => $e->getMessage(),
@@ -85,24 +80,26 @@ class LoginController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'email' => ['required', 'email'],
+            'email' => 'required|email|max:255|exists:customers,email',
             'password' => ['required'],
         ]);
 
         $authAttempt = Auth::attempt($credentials);
 
-        $user = Auth::user();
-        Auth::login($user);
+        if($authAttempt){
+            $user = Auth::user();
 
-        if ($user->is_active) {
-            $request->session()->regenerate();
-            return redirect()->intended('/dashboard');
-        } else {
-            Auth::logout();
-            return back()->withErrors([
-                'email' => 'Your account is inactive.',
-            ]);
+            if ($user->is_active) {
+                $request->session()->regenerate();
+                return redirect()->intended('/dashboard');
+            } else {
+                Auth::logout();
+                return back()->withErrors([
+                    'email' => 'Your account is inactive.',
+                ]);
+            }
         }
+        
  
         return back()->withErrors([
             'email' => 'The provided credentials do not match our records.',
