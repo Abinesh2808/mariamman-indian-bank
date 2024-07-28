@@ -15,7 +15,17 @@ class CreateAccountHistoryTable extends Migration
     {
         Schema::create('account_history', function (Blueprint $table) {
             $table->id();
+            $table->string('description');
+            $table->string('name');
+            $table->string('transaction_type'); 
+            $table->timestamp('transaction_date')->useCurrent();
+            $table->double('debit')->default(0);
+            $table->double('credit')->default(0);
+            $table->double('balance')->default(0);
+            $table->string('status')->default('completed');
+            $table->string('utr_number')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

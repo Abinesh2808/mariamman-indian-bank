@@ -16,6 +16,7 @@ class CreateBankTable extends Migration
         Schema::create('bank', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

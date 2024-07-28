@@ -27,9 +27,11 @@ class CreateCustomersTable extends Migration
             $table->string('id_card_type');
             $table->string('id_card_number');
             $table->integer('account_number');
+            $table->integer('customer_id');
             $table->boolean('is_active');
             $table->double('balance');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

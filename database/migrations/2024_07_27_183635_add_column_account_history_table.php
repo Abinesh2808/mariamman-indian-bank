@@ -20,15 +20,7 @@ class AddColumnAccountHistoryTable extends Migration
             $table->integer('account_number')->unsigned();
             $table->foreign('account_id')->references('account_number')
                                         ->on('customers')->onDelete('cascade');
-            $table->string('description');
-            $table->string('name');
-            $table->string('transaction_type'); 
-            $table->timestamp('transaction_date')->useCurrent();
-            $table->double('debit')->default(0);
-            $table->double('credit')->default(0);
-            $table->double('balance')->default(0);
-            $table->string('status')->default('completed');
-            $table->string('utr_number')->nullable();
+            
         });
 
 
