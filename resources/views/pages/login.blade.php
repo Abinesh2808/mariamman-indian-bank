@@ -24,7 +24,7 @@
                         @enderror
                     </div>
                     <button type="submit" class="btn btn-primary">Login</button>
-                    <span class="ms-4 text-muted">(If you want to login to existing account, use username:abinesh.s@zohomail.in, password:admin)</span>
+                    <span class="ms-4 text-muted">(If you want to login to existing account, use username:abinesh.s@zohomail.in, password:abinesh@123)</span>
                 </form>
                 <div class="mt-2 text-center">
                     <div class="d-flex justify-content-center">
