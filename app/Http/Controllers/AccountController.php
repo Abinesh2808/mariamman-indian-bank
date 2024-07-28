@@ -25,20 +25,23 @@ class AccountController extends Controller
         ];
 
         try {
-            $statement = AccountHistory::getStatement($details['account_number']);
+            $statement = AccountHistory::getStatement($details['account_number'], $details['statement_from'], $details['statement_to']);
             
             if($statement){
                 return redirect()->route('statement')
-                    ->with('account_statement', $statement);
+                    ->with('account_statement', $statement)
+                    ->withInput();
             } else {
                 return redirect()->route('statement')
-                         ->with('error', 'Failed to fetch account statement. Please verify account details and try again after sometime !');
+                         ->with('error', 'Failed to fetch account statement. Please verify account details and try again after sometime !')
+                         ->withInput();
             }
 
         } catch (\Exception $e){
             // 'status' => '',
             return redirect()->route('statement')
-                         ->with('error', 'Failed to fetch account statement. Please verify account details and try again after sometime !');
+                         ->with('error', 'Failed to fetch account statement. Please verify account details and try again after sometime !')
+                         ->withInput();
         }
     }
 
