@@ -1,4 +1,4 @@
-<?php
+    <?php
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoginController;
@@ -17,46 +17,50 @@ use App\Http\Controllers\BankController;
 |
 */
 
-#Welcome page
+// Welcome page
 Route::view('/', 'pages.login');
-Route::view('/welcome', 'layouts.welcome');
+// Route::view('/welcome', 'layouts.welcome');
+
+// Guest routes
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [LoginController::class, 'loginPage'])->name('login');
+    Route::post('/login', [LoginController::class, 'login']);
+    Route::get('/register', [LoginController::class, 'register'])->name('register');
+    Route::post('/register', [LoginController::class, 'registerCustomer']);
+});
+
+Route::get('/check-auth', function() {
+    return auth()->check() ? 'Authenticated' : 'Not Authenticated';
+});
 
 
-#Login routes
-Route::get('/register', [LoginController::class, 'register'])->name('register');
-Route::post('/register', [LoginController::class, 'registerCustomer']);
-Route::get('/login', [LoginController::class, 'login'])->name('login');
+// Authenticated routes
+Route::middleware(['web','auth'])->group(function () {
+    Route::get('/dashboard', [AccountController::class, 'dashboard'])->name('dashboard');
 
+    // Account routes
+    Route::get('/statement', [AccountController::class, 'getStatementPage'])->name('statement');
+    Route::match(['get', 'post'], '/statement', [AccountController::class, 'getStatement'])->name('statement');
+    Route::get('/statement/pdf', [AccountController::class, 'exportStatementPDF'])->name('statement.pdf');
+    Route::get('/statement/email', [AccountController::class, 'sendStatementEmail'])->name('statement.email');
 
-#Account routes
-Route::get('/statement', [AccountController::class, 'getStatementPage'])->name('statement');
-Route::match(['get', 'post'], '/statement', [AccountController::class, 'getStatement'])->name('statement');
-// Route::post('/statement', [AccountController::class, 'getStatement']);
-Route::get('/statement/pdf', [AccountController::class, 'exportStatementPDF'])->name('statement.pdf');
-Route::get('/statement/email', [AccountController::class, 'sendStatementEmail'])->name('statement.email');
+    Route::get('/deposit', [AccountController::class, 'depositAmountPage'])->name('deposit');
+    Route::post('/deposit', [AccountController::class, 'depositAmount']);
 
-Route::get('/deposit', [AccountController::class, 'depositAmountPage'])->name('deposit');
-Route::post('/deposit', [AccountController::class, 'depositAmount']);
+    Route::get('/withdraw', [AccountController::class, 'withdrawAmountPage'])->name('withdraw');
+    Route::post('/withdraw', [AccountController::class, 'withdrawAmount']);
 
-Route::get('/withdraw', [AccountController::class, 'withdrawAmountPage'])->name('withdraw');
-Route::post('/withdraw', [AccountController::class, 'withdrawAmount']);
+    Route::get('/update_account', [AccountController::class, 'updateAccount'])->name('update_account');
+    Route::get('/close_account', [AccountController::class, 'closeAccount'])->name('close_account');
 
-Route::get('/update_account', [AccountController::class, 'updateAccount'])->name('update_account');
-Route::get('/close_account', [AccountController::class, 'closeAccount'])->name('close_account');
+    Route::get('/check_balance', [AccountController::class, 'checkBalancePage'])->name('check_balance');
+    Route::post('/check_balance', [AccountController::class, 'checkBalance']);
+});
 
-Route::get('/check_balance', [AccountController::class, 'checkBalancePage'])->name('check_balance');
-Route::post('/check_balance', [AccountController::class, 'checkBalance']);
-
-
-#Customer routes
+// Customer routes
 Route::get('/whoami', [CustomerController::class, 'forgotAccountNumber'])->name('whoami');
 Route::get('/findme', [CustomerController::class, 'forgotPassword'])->name('findme');
 
-
-
-#Bank routes
+// Bank routes
 Route::get('/aboutus', [BankController::class, 'aboutUs'])->name('aboutus');
 Route::get('/contactus', [BankController::class, 'contactUs'])->name('contactus');
-
-
-Route::get('/dashboard', [AccountController::class, 'dashboard'])->name('dashboard');

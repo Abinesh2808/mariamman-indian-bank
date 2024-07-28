@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\Customer;
 use App\Http\Controllers\BankController;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 
 
 class LoginController extends Controller
@@ -52,9 +54,28 @@ class LoginController extends Controller
         
     }
 
-    public function login()
+    public function loginPage()
     {
         return view('pages.login');
+    }
+
+    public function login(Request $request)
+    {
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
+        ]);
+
+        $authAttempt = Auth::attempt($credentials);
+
+        if ($authAttempt){
+            $request->session()->regenerate();
+            return redirect()->intended('/dashboard');
+        }
+ 
+        return back()->withErrors([
+            'email' => 'The provided credentials do not match our records.',
+        ]);
     }
 
     public function verifyRegistration(Request $request)
