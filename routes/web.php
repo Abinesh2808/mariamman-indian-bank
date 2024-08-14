@@ -47,7 +47,7 @@ Route::middleware(['web','auth'])->group(function () {
 
     // Account routes
     Route::get('/statement', [AccountController::class, 'getStatementPage'])->name('statement');
-    Route::match(['get', 'post'], '/statement', [AccountController::class, 'getStatement'])->name('statement');
+    Route::get('/statement', [AccountController::class, 'getStatement'])->name('statement');
     Route::get('/statement/pdf', [AccountController::class, 'exportStatementPDF'])->name('statement.pdf');
     Route::get('/statement/email', [AccountController::class, 'sendStatementEmail'])->name('statement.email');
 

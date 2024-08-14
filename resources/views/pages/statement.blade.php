@@ -20,7 +20,7 @@
                     </div>
                 @endif
                 <h2 class="mb-4">Account Statement</h2>
-                <form action="{{ route('statement') }}" method="POST">
+                <form action="{{ route('statement') }}" method="GET">
                     @csrf
                     <div class="mb-3">
                         <label for="account_number" class="form-label">Account Number</label>
